@@ -1,44 +1,49 @@
 class UserManager {
-  static quantity = 0;
-  static #users = [];
+  constructor() {
+    this.quantity = 0;
+    this.users = [];
+  }
 
   create({ photo, email, password, role }) {
     if (!photo || !email || !password || !role) {
       throw new Error('All fields except id are required');
     }
     const user = {
-      id: ++UserManager.quantity,
+      id: ++this.quantity,
       photo,
       email,
       password,
       role
     };
-    UserManager.#users.push(user);
+    this.users.push(user);
     return user;
   }
 
   read() {
-    return UserManager.#users;
+    return this.users;
   }
 
   readOne(id) {
-    return UserManager.#users.find(user => user.id === id) || null;
+    const user = this.users.find(user => user.id === id);
+    return user || 'User not found';
   }
 
   update(id, newData) {
-    const index = UserManager.#users.findIndex(user => user.id === id);
-    if (index === -1) return null;
-
-    UserManager.#users[index] = { ...UserManager.#users[index], ...newData };
-    return UserManager.#users[index];
+    const index = this.users.findIndex(user => user.id === id);
+    if (index === -1) {
+      return 'User not found';
+    }
+    this.users[index] = { ...this.users[index], ...newData };
+    return this.users[index];
   }
 
   destroy(id) {
-    const index = UserManager.#users.findIndex(user => user.id === id);
-    if (index === -1) return false;
-
-    UserManager.#users.splice(index, 1);
-    return true;
+    const index = this.users.findIndex(user => user.id === id);
+    if (index === -1) {
+      return 'User not found';
+    }
+    this.users.splice(index, 1);
+    return 'User deleted';
   }
 }
 
