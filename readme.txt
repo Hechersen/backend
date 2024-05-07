@@ -1,6 +1,8 @@
-Tercera entrega del curso de desarrollo backend de Coderhouse.
+Cuarta entrega del curso de desarrollo backend de Coderhouse. (Primera pre entrega)
 
-Comenté el código de index.js para no eliminarlo pero ahora estoy utilizando app.js.
+Realicé la corrección realizada en la entrega del tercer desafío.
+Eliminé el archivo de userManager.js dado que no estaba utilizandolo.
+Realicé las consignas de la primera pre entrega.
 
 Muchas gracias!
 
