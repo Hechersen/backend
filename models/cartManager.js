@@ -3,6 +3,7 @@ const fs = require('fs/promises');
 class CartManager {
     constructor(filePath) {
         this.filePath = filePath;
+        this.init();
     }
 
     async init() {
@@ -20,11 +21,14 @@ class CartManager {
 
     async getCartById(cartId) {
         const carts = await this.getCarts();
-        return carts.find(cart => cart.id === cartId) || null;
+        cartId = Number(cartId);
+        const foundCart = carts.find(cart => cart.id === cartId);
+        return foundCart || null;
     }
 
     async addProductToCart(cartId, product, quantity) {
         const carts = await this.getCarts();
+        cartId = Number(cartId);
         const cart = carts.find(cart => cart.id === cartId);
         if (!cart) {
             throw new Error('Cart not found');
@@ -32,12 +36,14 @@ class CartManager {
         const existingProduct = cart.products.find(p => p.id === product.id);
         if (existingProduct) {
             existingProduct.quantity += quantity;
+
         } else {
             product.quantity = quantity;
             cart.products.push(product);
         }
         await this.saveCarts(carts);
     }
+
 
     async saveCarts(carts) {
         await fs.writeFile(this.filePath, JSON.stringify(carts, null, 2));

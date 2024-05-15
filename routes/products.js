@@ -6,6 +6,15 @@ const productManager = new ProductManager('./data/products.json');
 router.get('/', async (req, res) => {
   try {
     const products = await productManager.getAllProducts();
+    res.render('home', { products });
+  } catch (error) {
+    res.status(500).json({ error: 'Unable to retrieve products' });
+  }
+});
+
+router.get('/api', async (req, res) => {
+  try {
+    const products = await productManager.getAllProducts();
     res.json(products);
   } catch (error) {
     res.status(500).json({ error: 'Unable to retrieve products' });

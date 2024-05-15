@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1715734800517,
+    "products": [
+      {
+        "id": 1,
+        "name": "Remera",
+        "price": 1000,
+        "code": "P001",
+        "quantity": 1
+      }
+    ]
+  }
+]
