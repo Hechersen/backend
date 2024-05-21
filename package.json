@@ -1,0 +1,16 @@
+{
+  "name": "backend-main",
+  "version": "1.0.0",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.19.2",
+    "express-handlebars": "^7.1.2",
+    "handlebars-layouts": "^3.1.4",
+    "socket.io": "^4.7.5"
+  },
+  "scripts": {
+    "start": "node app.js"
+  }
+}
+
+

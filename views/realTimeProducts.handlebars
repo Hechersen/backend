@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Real-Time Product List</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/main.js"></script>
+</head>
+<body>
+  <h1>Real-Time Product List</h1>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>Product Name</th>
+        <th>Price</th>
+        <th>ID</th>
+        <th>Code</th>
+      </tr>
+    </thead>
+    <tbody id="productList">
+      {{#each products}}
+        <tr data-id="{{this.id}}">
+          <td>{{this.title}}</td>
+          <td>{{this.price}}</td>
+          <td>{{this.id}}</td>
+          <td>{{this.code}}</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <form id="addProductForm">
+    <input type="text" id="productName" placeholder="Product Name">
+    <input type="number" id="productPrice" placeholder="Product Price">
+    <input type="text" id="productCode" placeholder="Product Code">
+    <button type="submit">Add Product</button>
+  </form>
+
+  <form id="deleteProductForm">
+    <input type="text" id="deleteProductId" placeholder="Product ID">
+    <button type="submit">Delete Product</button>
+  </form>
+</body>
+</html>
