@@ -38,4 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
       row.remove();
     }
   });
+
+  // Manejo de mensajes de error
+  socket.on('error', (message) => {
+    alert(message);
+  });
+
 });

@@ -43,8 +43,17 @@ io.on('connection', (socket) => {
   });
 
   socket.on('delete product', async (productId) => {
-    await productManager.deleteProduct(parseInt(productId));
-    io.emit('product delete', productId);
+    try {
+      const product = await productManager.getProductById(parseInt(productId));
+      if (!product || product.error) {
+        socket.emit('error', `Product with id ${productId} not found`);
+      } else {
+        await productManager.deleteProduct(parseInt(productId));
+        io.emit('product delete', productId);
+      }
+    } catch (error) {
+      socket.emit('error', `Error deleting product with id ${productId}`);
+    }
   });
 
   socket.on('disconnect', () => {
