@@ -1,9 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const CartManager = require('../models/cartManager');
-const cartManager = new CartManager('./data/carts.json');
-const ProductManager = require('../models/productManager');
-const productManager = new ProductManager('./data/products.json');
+// const CartManager = require('../dao/fileSystem/cartManager');
+// const cartManager = new CartManager('./data/carts.json');
+// const ProductManager = require('../dao/fileSystem/productManager');
+// const productManager = new ProductManager('./data/products.json');
+const CartManager = require('../dao/db/cartManager');
+const cartManager = new CartManager();
+const ProductManager = require('../dao/db/productManager');
+const productManager = new ProductManager();
 
 
 router.post('/', async (req, res) => {

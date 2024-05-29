@@ -20,10 +20,10 @@
     </thead>
     <tbody id="productList">
       {{#each products}}
-        <tr data-id="{{this.id}}">
+        <tr data-id="{{this._id}}">
           <td>{{this.title}}</td>
           <td>{{this.price}}</td>
-          <td>{{this.id}}</td>
+          <td>{{this._id}}</td>
           <td>{{this.code}}</td>
         </tr>
       {{/each}}

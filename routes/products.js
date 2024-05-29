@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const ProductManager = require('../models/productManager');
-const productManager = new ProductManager('./data/products.json');
+// const ProductManager = require('../dao/fileSystem/productManager');
+// const productManager = new ProductManager('./data/products.json');
+const ProductManager = require('../dao/db/productManager');
+const productManager = new ProductManager();
+
 
 // Renderiza la vista home.handlebars
 router.get('/', async (req, res) => {

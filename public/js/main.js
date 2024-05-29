@@ -12,11 +12,19 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Manejo de eventos para el formulario de eliminar producto
+  // document.getElementById('deleteProductForm').addEventListener('submit', (e) => {
+  //   e.preventDefault();
+  //   const productId = document.getElementById('deleteProductId').value;
+  //   socket.emit('delete product', productId);
+  // });
+
   document.getElementById('deleteProductForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const productId = document.getElementById('deleteProductId').value;
+    console.log(`Attempting to delete product with ID: ${productId}`);
     socket.emit('delete product', productId);
   });
+  
 
   // Actualización de la lista de productos en tiempo real
   socket.on('product update', (product) => {

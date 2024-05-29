@@ -1,20 +1,36 @@
+
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const { engine } = require('express-handlebars');
-const ProductManager = require('./models/productManager');
-const productManager = new ProductManager('./data/products.json');
+const connectDB = require('./db');
+// const ProductManager = require('./dao/fileSystem/productManager');
+// const productManager = new ProductManager('./data/products.json');
+const ProductManager = require('./dao/db/productManager'); // Asegúrate de que esta ruta es correcta
+const productManager = new ProductManager();
+// pal chat
+const MessageManager = require('./dao/db/messageManager');
+const messageManager = new MessageManager();
+
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 const port = 8080;
 
+connectDB();
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-app.engine('handlebars', engine());
+// Configuración de Handlebars
+app.engine('handlebars', engine({
+  runtimeOptions: {
+    allowProtoPropertiesByDefault: true,
+    allowProtoMethodsByDefault: true,
+  }
+}));
 app.set('view engine', 'handlebars');
 app.set('views', './views');
 
@@ -42,19 +58,29 @@ io.on('connection', (socket) => {
     }
   });
 
+  // socket.on('delete product', async (productId) => {
+  //   try {
+  //     const product = await productManager.getProductById(parseInt(productId));
+  //     if (!product || product.error) {
+  //       socket.emit('error', `Product with id ${productId} not found`);
+  //     } else {
+  //       await productManager.deleteProduct(parseInt(productId));
+  //       io.emit('product delete', productId);
+  //     }
+  //   } catch (error) {
+  //     socket.emit('error', `Error deleting product with id ${productId}`);
+  //   }
+  // });
+
   socket.on('delete product', async (productId) => {
+    console.log(`Server received request to delete product with ID: ${productId}`);
     try {
-      const product = await productManager.getProductById(parseInt(productId));
-      if (!product || product.error) {
-        socket.emit('error', `Product with id ${productId} not found`);
-      } else {
-        await productManager.deleteProduct(parseInt(productId));
-        io.emit('product delete', productId);
-      }
+      const result = await productManager.deleteProduct(productId);
+      io.emit('product delete', productId);
     } catch (error) {
-      socket.emit('error', `Error deleting product with id ${productId}`);
+      socket.emit('error', `Error deleting product with id ${productId}: ${error.message}`);
     }
-  });
+  });  
 
   socket.on('disconnect', () => {
     console.log('Usuario desconectado');
