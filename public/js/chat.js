@@ -1,18 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const socket = io();
-  
-    document.getElementById('messageForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const userEmail = document.getElementById('userEmail').value;
-      const messageContent = document.getElementById('messageContent').value;
-      const message = { user: userEmail, message: messageContent };
-      socket.emit('new message', message);
-    });
-  
-    socket.on('message update', (message) => {
-      const item = document.createElement('li');
-      item.textContent = `${message.user}: ${message.message}`;
-      document.getElementById('messages').appendChild(item);
-    });
+  const socket = io();
+
+  document.getElementById('chatForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const username = document.getElementById('username').value;
+    const message = document.getElementById('message').value;
+    socket.emit('chat message', { user: username, message });
   });
-  
+
+  socket.on('chat message', (msg) => {
+    const item = document.createElement('div');
+    item.textContent = `${msg.user}: ${msg.message}`;
+    document.getElementById('messages').appendChild(item);
+  });
+});

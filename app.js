@@ -44,6 +44,10 @@ app.get('/realtimeproducts', async (req, res) => {
   res.render('realTimeProducts', { products });
 });
 
+app.get('/chat', (req, res) => {
+  res.render('chat');
+});
+
 io.on('connection', (socket) => {
   console.log('Usuario conectado');
 
@@ -81,6 +85,11 @@ io.on('connection', (socket) => {
       socket.emit('error', `Error deleting product with id ${productId}: ${error.message}`);
     }
   });  
+
+  socket.on('chat message', async (msg) => {
+    const message = await messageManager.addMessage(msg);
+    io.emit('chat message', message);
+  });
 
   socket.on('disconnect', () => {
     console.log('Usuario desconectado');
