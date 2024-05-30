@@ -1,19 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Chat</title>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/chat.js"></script>
 </head>
+
 <body>
   <h1>Chat</h1>
-  <div id="messages"></div>
+  <div id="messages">
+     {{#each messages}}
+      <p>{{this.user}}: {{this.message}}</p>
+    {{/each}}
+  </div>
   <form id="chatForm">
     <input type="text" id="username" placeholder="Your email" required>
     <input type="text" id="message" placeholder="Your message" required>
     <button type="submit">Send</button>
   </form>
-</body>
-</html>
 
+</body>
+
+</html>

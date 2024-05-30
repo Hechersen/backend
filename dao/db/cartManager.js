@@ -49,6 +49,19 @@ class CartManager {
       throw new Error('Error removing product from cart');
     }
   }
+
+  async deleteCart(cartId) {
+    try {
+      const cart = await Cart.findByIdAndDelete(cartId);
+      if (!cart) {
+        throw new Error('Cart not found');
+      }
+    } catch (error) {
+      throw new Error('Error deleting cart');
+    }
+  }
+
 }
+
 
 module.exports = CartManager;

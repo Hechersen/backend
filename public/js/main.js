@@ -10,14 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const product = { title, price, code };
     socket.emit('new product', product);
   });
-
-  // Manejo de eventos para el formulario de eliminar producto
-  // document.getElementById('deleteProductForm').addEventListener('submit', (e) => {
-  //   e.preventDefault();
-  //   const productId = document.getElementById('deleteProductId').value;
-  //   socket.emit('delete product', productId);
-  // });
-
+  
   document.getElementById('deleteProductForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const productId = document.getElementById('deleteProductId').value;
@@ -39,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('productList').appendChild(row);
   });
 
-  // Eliminación de un producto de la lista en tiempo real
+  // Eliminación de un producto en tiempo real
   socket.on('product delete', (productId) => {
     const row = document.querySelector(`tr[data-id='${productId}']`);
     if (row) {
@@ -47,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Manejo de mensajes de error
+  // Mensajes de error
   socket.on('error', (message) => {
     alert(message);
   });

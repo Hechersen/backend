@@ -44,8 +44,9 @@ app.get('/realtimeproducts', async (req, res) => {
   res.render('realTimeProducts', { products });
 });
 
-app.get('/chat', (req, res) => {
-  res.render('chat');
+app.get('/chat', async (req, res) => {
+  const messages = await messageManager.getAllMessages();
+  res.render('chat', { messages });
 });
 
 io.on('connection', (socket) => {
@@ -61,21 +62,7 @@ io.on('connection', (socket) => {
       io.emit('product update', newProduct);
     }
   });
-
-  // socket.on('delete product', async (productId) => {
-  //   try {
-  //     const product = await productManager.getProductById(parseInt(productId));
-  //     if (!product || product.error) {
-  //       socket.emit('error', `Product with id ${productId} not found`);
-  //     } else {
-  //       await productManager.deleteProduct(parseInt(productId));
-  //       io.emit('product delete', productId);
-  //     }
-  //   } catch (error) {
-  //     socket.emit('error', `Error deleting product with id ${productId}`);
-  //   }
-  // });
-
+  
   socket.on('delete product', async (productId) => {
     console.log(`Server received request to delete product with ID: ${productId}`);
     try {
@@ -90,6 +77,7 @@ io.on('connection', (socket) => {
     const message = await messageManager.addMessage(msg);
     io.emit('chat message', message);
   });
+
 
   socket.on('disconnect', () => {
     console.log('Usuario desconectado');

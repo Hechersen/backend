@@ -43,43 +43,20 @@ class ProductManager {
     }
   }
 
-  // async deleteProduct(id) {
-  //   try {
-  //     if (!mongoose.Types.ObjectId.isValid(id)) {
-  //       throw new Error('Invalid product ID format');
-  //     }
-  //     console.log(`Attempting to delete product with ID: ${id}`);
-  //     const objectId = mongoose.Types.ObjectId(id);
-  //     const result = await Product.findByIdAndDelete(objectId);
-  //     if (!result) {
-  //       throw new Error('Product not found');
-  //     }
-  //     return { message: 'Product deleted successfully' };
-  //   } catch (error) {
-  //     console.error(`Error deleting product: ${error.message}`);
-  //     throw new Error(`Error deleting product with id ${id}`);
-  //   }
-  // }
-
- 
   async deleteProduct(id) {
-    console.log(`deleteProduct method called with ID: ${id}`);
     try {
       if (!mongoose.Types.ObjectId.isValid(id)) {
         console.error('Invalid product ID format');
         throw new Error('Invalid product ID format');
       }
-      console.log(`Attempting to delete product with ID: ${id}`);
-      const objectId = new mongoose.Types.ObjectId(id);  // Aquí es donde hacemos el cambio
+      const objectId = new mongoose.Types.ObjectId(id);
       const result = await Product.findByIdAndDelete(objectId);
       if (!result) {
         console.error('Product not found');
         throw new Error('Product not found');
       }
-      console.log('Product deleted successfully');
       return { message: 'Product deleted successfully' };
     } catch (error) {
-      console.error(`Error deleting product: ${error.message}`);
       throw new Error(`Error deleting product with id ${id}`);
     }
   }
