@@ -20,6 +20,15 @@ class ProductManager {
     }
   }
 
+  async getProducts(queryFilter, options) {
+    try {
+      const products = await Product.paginate(queryFilter, options);
+      return products;
+    } catch (error) {
+      throw new Error('Error retrieving products');
+    }
+  }
+
   async getProductById(id) {
     try {
       if (!mongoose.Types.ObjectId.isValid(id)) {

@@ -1,15 +1,11 @@
 const express = require('express');
 const router = express.Router();
-// const CartManager = require('../dao/fileSystem/cartManager');
-// const cartManager = new CartManager('./data/carts.json');
-// const ProductManager = require('../dao/fileSystem/productManager');
-// const productManager = new ProductManager('./data/products.json');
 const CartManager = require('../dao/db/cartManager');
 const cartManager = new CartManager();
 const ProductManager = require('../dao/db/productManager');
 const productManager = new ProductManager();
 
-
+// Crear un nuevo carrito
 router.post('/', async (req, res) => {
   try {
     const newCart = await cartManager.createCart();
@@ -19,6 +15,7 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Agregar producto al carrito
 router.post('/:cid/products', async (req, res) => {
   try {
     const { cid } = req.params;
@@ -34,6 +31,7 @@ router.post('/:cid/products', async (req, res) => {
   }
 });
 
+// Obtener un carrito por ID
 router.get('/:cid', async (req, res) => {
   try {
     const { cid } = req.params;
@@ -47,6 +45,7 @@ router.get('/:cid', async (req, res) => {
   }
 });
 
+// Eliminar un carrito por ID
 router.delete('/:cid', async (req, res) => {
   try {
     const { cid } = req.params;
@@ -57,6 +56,34 @@ router.delete('/:cid', async (req, res) => {
   }
 });
 
+// Eliminar un producto del carrito
+router.delete('/:cid/products/:pid', async (req, res) => {
+  try {
+    await cartManager.removeProductFromCart(req.params.cid, req.params.pid);
+    res.json({ message: 'Product removed from cart successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error removing product from cart' });
+  }
+});
+
+// Actualizar un carrito con un arreglo de productos
+router.put('/:cid', async (req, res) => {
+  try {
+    const updatedCart = await cartManager.updateCart(req.params.cid, req.body.products);
+    res.json(updatedCart);
+  } catch (error) {
+    res.status(500).json({ error: 'Error updating cart' });
+  }
+});
+
+// Actualizar la cantidad de ejemplares del producto en el carrito
+router.put('/:cid/products/:pid', async (req, res) => {
+  try {
+    const updatedCart = await cartManager.updateProductQuantity(req.params.cid, req.params.pid, req.body.quantity);
+    res.json(updatedCart);
+  } catch (error) {
+    res.status(500).json({ error: 'Error updating product quantity in cart' });
+  }
+});
+
 module.exports = router;
-
-

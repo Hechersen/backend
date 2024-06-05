@@ -1,17 +1,14 @@
-
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const { engine } = require('express-handlebars');
 const connectDB = require('./db');
-// const ProductManager = require('./dao/fileSystem/productManager');
-// const productManager = new ProductManager('./data/products.json');
-const ProductManager = require('./dao/db/productManager'); // Asegúrate de que esta ruta es correcta
+const ProductManager = require('./dao/db/productManager'); 
 const productManager = new ProductManager();
-// pal chat
 const MessageManager = require('./dao/db/messageManager');
 const messageManager = new MessageManager();
-
+const CartManager = require('./dao/db/cartManager');
+const cartManager = new CartManager();  
 
 const app = express();
 const server = http.createServer(app);
@@ -34,6 +31,7 @@ app.engine('handlebars', engine({
 app.set('view engine', 'handlebars');
 app.set('views', './views');
 
+// Rutas
 const productRoutes = require('./routes/products');
 const cartRoutes = require('./routes/carts');
 app.use('/api/products', productRoutes);
@@ -49,6 +47,20 @@ app.get('/chat', async (req, res) => {
   res.render('chat', { messages });
 });
 
+app.get('/carts/:cid', async (req, res) => {
+  try {
+    const cart = await cartManager.getCartById(req.params.cid);
+    if (!cart) {
+      return res.status(404).json({ error: 'Cart not found' });
+    }
+    res.render('cart', { cart });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+// Socket
 io.on('connection', (socket) => {
   console.log('Usuario conectado');
 
@@ -71,13 +83,12 @@ io.on('connection', (socket) => {
     } catch (error) {
       socket.emit('error', `Error deleting product with id ${productId}: ${error.message}`);
     }
-  });  
+  });
 
   socket.on('chat message', async (msg) => {
     const message = await messageManager.addMessage(msg);
     io.emit('chat message', message);
   });
-
 
   socket.on('disconnect', () => {
     console.log('Usuario desconectado');
