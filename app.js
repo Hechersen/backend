@@ -35,6 +35,7 @@ app.set('views', './views');
 const productRoutes = require('./routes/products');
 const cartRoutes = require('./routes/carts');
 app.use('/api/products', productRoutes);
+app.use('/products', productRoutes);
 app.use('/api/carts', cartRoutes);
 
 app.get('/realtimeproducts', async (req, res) => {
@@ -58,7 +59,6 @@ app.get('/carts/:cid', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 
 // Socket
 io.on('connection', (socket) => {

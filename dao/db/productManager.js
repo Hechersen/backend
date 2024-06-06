@@ -45,12 +45,13 @@ class ProductManager {
       if (!mongoose.Types.ObjectId.isValid(id)) {
         throw new Error('Invalid product ID format');
       }
-      const objectId = mongoose.Types.ObjectId(id);
+      const objectId = new mongoose.Types.ObjectId(id);
       return await Product.findByIdAndUpdate(objectId, newData, { new: true });
     } catch (error) {
+      console.error('Error in updateProduct:', error); // Agrega este log detallado
       throw new Error('Error updating product');
     }
-  }
+  }  
 
   async deleteProduct(id) {
     try {

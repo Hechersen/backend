@@ -3,14 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Home</title>
+  <title>Product List</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/main.js"></script>
 </head>
 <body>
   <h1>Product List</h1>
+  <button onclick="createCart()">Create Cart</button>
   <ul>
     {{#each products}}
-      <li>{{this.title}} - ${{this.price}}</li>
+      <li>
+        {{this.title}} - ${{this.price}}
+        <button class="addToCartButton" data-product-id="{{this._id}}">Add to Cart</button>
+        <a href="/products/{{this._id}}">View Details</a>
+      </li>
     {{/each}}
   </ul>
+  
 </body>
 </html>

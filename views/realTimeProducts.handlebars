@@ -16,6 +16,8 @@
         <th>Price</th>
         <th>ID</th>
         <th>Code</th>
+        <th>Category</th>
+        <th>Description</th>
       </tr>
     </thead>
     <tbody id="productList">
@@ -25,6 +27,8 @@
           <td>{{this.price}}</td>
           <td>{{this._id}}</td>
           <td>{{this.code}}</td>
+          <td>{{this.category}}</td>
+          <td>{{this.description}}</td>
         </tr>
       {{/each}}
     </tbody>
@@ -34,12 +38,21 @@
     <input type="text" id="productName" placeholder="Product Name">
     <input type="number" id="productPrice" placeholder="Product Price">
     <input type="text" id="productCode" placeholder="Product Code">
+    <input type="text" id="productCategory" placeholder="Product Category">
+    <input type="text" id="productDescription" placeholder="Product Description">
     <button type="submit">Add Product</button>
   </form>
 
   <form id="deleteProductForm">
     <input type="text" id="deleteProductId" placeholder="Product ID">
     <button type="submit">Delete Product</button>
+  </form>
+
+  <form id="updateProductForm">
+    <input type="text" id="updateProductId" placeholder="Product ID">
+    <input type="text" id="updateProductCategory" placeholder="New Category">
+    <input type="text" id="updateProductDescription" placeholder="New Description">
+    <button type="submit">Update Product</button>
   </form>
 </body>
 </html>

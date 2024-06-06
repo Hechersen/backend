@@ -6,6 +6,7 @@ const productSchema = new mongoose.Schema({
   price: Number,
   code: String,
   category: String,
+  description: String,
   availability: Boolean
 }, {
   toObject: { getters: true },
@@ -17,4 +18,3 @@ productSchema.plugin(mongoosePaginate);
 const Product = mongoose.model('Product', productSchema);
 
 module.exports = Product;
-

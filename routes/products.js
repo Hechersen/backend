@@ -6,8 +6,6 @@ const productManager = new ProductManager();
 router.get('/', async (req, res) => {
   try {
     const { limit = 10, page = 1, sort, query } = req.query;
-
-    // Convertir valores a tipos adecuados
     const limitValue = parseInt(limit, 10);
     const pageValue = parseInt(page, 10);
     const sortValue = sort === 'asc' ? 1 : -1;
@@ -38,7 +36,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Renderiza la vista home
 router.get('/view', async (req, res) => {
   try {
     const products = await productManager.getAllProducts();
@@ -48,17 +45,16 @@ router.get('/view', async (req, res) => {
   }
 });
 
-// Rutas API
-router.get('/:id', async (req, res) => {
+router.get('/:pid', async (req, res) => {
   try {
-    const product = await productManager.getProductById(req.params.id);
-    if (product) {
-      res.json(product);
-    } else {
-      res.status(404).json({ error: 'Product not found' });
+    const { pid } = req.params;
+    const product = await productManager.getProductById(pid);
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
     }
+    res.render('productDetails', { product });
   } catch (error) {
-    res.status(500).json({ error: 'Error retrieving the product' });
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -71,18 +67,22 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id/update', async (req, res) => {
   try {
-    const updatedProduct = await productManager.updateProduct(req.params.id, req.body);
+    const { id } = req.params;
+    const { category, description } = req.body;
+    const updatedProduct = await productManager.updateProduct(id, { category, description });
     if (updatedProduct) {
       res.json(updatedProduct);
     } else {
       res.status(404).json({ error: 'Product not found' });
     }
   } catch (error) {
+    console.error('Error updating the product:', error); // Agregar esta línea para el log de errores
     res.status(500).json({ error: 'Error updating the product' });
   }
 });
+
 
 router.delete('/:id', async (req, res) => {
   try {
