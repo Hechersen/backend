@@ -31,6 +31,8 @@ app.engine('handlebars', engine({
 app.set('view engine', 'handlebars');
 app.set('views', './views');
 
+app.set('io', io);
+
 // Rutas
 const productRoutes = require('./routes/products');
 const cartRoutes = require('./routes/carts');
@@ -78,7 +80,7 @@ io.on('connection', (socket) => {
   socket.on('delete product', async (productId) => {
     console.log(`Server received request to delete product with ID: ${productId}`);
     try {
-      const result = await productManager.deleteProduct(productId);
+      await productManager.deleteProduct(productId);
       io.emit('product delete', productId);
     } catch (error) {
       socket.emit('error', `Error deleting product with id ${productId}: ${error.message}`);

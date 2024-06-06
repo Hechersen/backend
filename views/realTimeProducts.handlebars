@@ -8,6 +8,8 @@
 </head>
 <body>
   <h1>Real-Time Product List</h1>
+
+  <button onclick="createCart()">Create Cart</button>
   
   <table>
     <thead>
@@ -29,6 +31,7 @@
           <td>{{this.code}}</td>
           <td>{{this.category}}</td>
           <td>{{this.description}}</td>
+          <td><button class="addToCartButton" data-product-id="{{this._id}}">Add to Cart</button></td>
         </tr>
       {{/each}}
     </tbody>

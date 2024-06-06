@@ -42,18 +42,31 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   socket.on('product update', (product) => {
-    const row = document.createElement('tr');
-    row.setAttribute('data-id', product.id);
-    row.innerHTML = `
-      <td>${product.title}</td>
-      <td>${product.price}</td>
-      <td>${product.id}</td>
-      <td>${product.code}</td>
-      <td>${product.category}</td>
-      <td>${product.description}</td>
-      <td><button class="addToCartButton" data-product-id="${product.id}">Add to Cart</button></td>
-    `;
-    document.getElementById('productList').appendChild(row);
+    const existingRow = document.querySelector(`tr[data-id='${product.id}']`);
+    if (existingRow) {
+      existingRow.innerHTML = `
+        <td>${product.title}</td>
+        <td>${product.price}</td>
+        <td>${product.id}</td>
+        <td>${product.code}</td>
+        <td>${product.category}</td>
+        <td>${product.description}</td>
+        <td><button class="addToCartButton" data-product-id="${product.id}">Add to Cart</button></td>
+      `;
+    } else {
+      const row = document.createElement('tr');
+      row.setAttribute('data-id', product.id);
+      row.innerHTML = `
+        <td>${product.title}</td>
+        <td>${product.price}</td>
+        <td>${product.id}</td>
+        <td>${product.code}</td>
+        <td>${product.category}</td>
+        <td>${product.description}</td>
+        <td><button class="addToCartButton" data-product-id="${product.id}">Add to Cart</button></td>
+      `;
+      document.getElementById('productList').appendChild(row);
+    }
   });
 
   socket.on('product delete', (productId) => {

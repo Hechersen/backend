@@ -51,7 +51,7 @@ class ProductManager {
       console.error('Error in updateProduct:', error); // Agrega este log detallado
       throw new Error('Error updating product');
     }
-  }  
+  }
 
   async deleteProduct(id) {
     try {

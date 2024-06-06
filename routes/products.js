@@ -67,22 +67,23 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Actualizar un producto existente con categoría y descripción
 router.put('/:id/update', async (req, res) => {
   try {
     const { id } = req.params;
     const { category, description } = req.body;
     const updatedProduct = await productManager.updateProduct(id, { category, description });
     if (updatedProduct) {
+      // Emitir evento de actualización de producto
+      req.app.get('io').emit('product update', updatedProduct);
       res.json(updatedProduct);
     } else {
       res.status(404).json({ error: 'Product not found' });
     }
   } catch (error) {
-    console.error('Error updating the product:', error); // Agregar esta línea para el log de errores
     res.status(500).json({ error: 'Error updating the product' });
   }
 });
-
 
 router.delete('/:id', async (req, res) => {
   try {
