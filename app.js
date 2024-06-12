@@ -3,12 +3,17 @@ const http = require('http');
 const { Server } = require('socket.io');
 const { engine } = require('express-handlebars');
 const connectDB = require('./db');
-const ProductManager = require('./dao/db/productManager'); 
+const ProductManager = require('./dao/db/productManager');
 const productManager = new ProductManager();
 const MessageManager = require('./dao/db/messageManager');
 const messageManager = new MessageManager();
 const CartManager = require('./dao/db/cartManager');
-const cartManager = new CartManager();  
+const cartManager = new CartManager();
+const session = require('express-session');
+const passport = require('passport');
+const flash = require('connect-flash');
+
+require('./config/passport'); 
 
 const app = express();
 const server = http.createServer(app);
@@ -33,24 +38,60 @@ app.set('views', './views');
 
 app.set('io', io);
 
+// Sesiones
+app.use(session({
+  secret: 'secret',
+  resave: true,
+  saveUninitialized: true
+}));
+
+// Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Connect flash
+app.use(flash());
+
+// Global variables
+app.use((req, res, next) => {
+  res.locals.success_msg = req.flash('success_msg');
+  res.locals.error_msg = req.flash('error_msg');
+  res.locals.error = req.flash('error');
+  res.locals.user = req.user || null;
+  next();
+});
+
+// Función ensureAuthenticated
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  req.flash('error_msg', 'Please log in to view that resource');
+  res.redirect('/users/login');
+}
+
 // Rutas
 const productRoutes = require('./routes/products');
 const cartRoutes = require('./routes/carts');
-app.use('/api/products', productRoutes);
-app.use('/products', productRoutes);
-app.use('/api/carts', cartRoutes);
+const userRoutes = require('./routes/users'); 
 
-app.get('/realtimeproducts', async (req, res) => {
+app.use('/api/products', productRoutes);
+app.use('/products', ensureAuthenticated, productRoutes);
+app.use('/api/carts', cartRoutes);
+app.use('/carts', ensureAuthenticated, cartRoutes);
+app.use('/users', userRoutes);
+
+app.get('/realtimeproducts', ensureAuthenticated, async (req, res) => {
   const products = await productManager.getAllProducts();
   res.render('realTimeProducts', { products });
 });
 
-app.get('/chat', async (req, res) => {
+app.get('/chat', ensureAuthenticated, async (req, res) => {
   const messages = await messageManager.getAllMessages();
   res.render('chat', { messages });
 });
 
-app.get('/carts/:cid', async (req, res) => {
+app.get('/carts/:cid', ensureAuthenticated, async (req, res) => {
   try {
     const cart = await cartManager.getCartById(req.params.cid);
     if (!cart) {
@@ -76,7 +117,7 @@ io.on('connection', (socket) => {
       io.emit('product update', newProduct);
     }
   });
-  
+
   socket.on('delete product', async (productId) => {
     console.log(`Server received request to delete product with ID: ${productId}`);
     try {

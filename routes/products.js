@@ -3,6 +3,7 @@ const router = express.Router();
 const ProductManager = require('../dao/db/productManager');
 const productManager = new ProductManager();
 
+// Ruta para devolver JSON
 router.get('/', async (req, res) => {
   try {
     const { limit = 10, page = 1, sort, query } = req.query;
@@ -36,10 +37,11 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Nueva ruta para renderizar vista de productos
 router.get('/view', async (req, res) => {
   try {
     const products = await productManager.getAllProducts();
-    res.render('home', { products });
+    res.render('products', { products, user: req.user });
   } catch (error) {
     res.status(500).json({ status: 'error', message: 'Unable to retrieve products' });
   }
@@ -74,7 +76,6 @@ router.put('/:id/update', async (req, res) => {
     const { category, description } = req.body;
     const updatedProduct = await productManager.updateProduct(id, { category, description });
     if (updatedProduct) {
-      // Emitir evento de actualización de producto
       req.app.get('io').emit('product update', updatedProduct);
       res.json(updatedProduct);
     } else {

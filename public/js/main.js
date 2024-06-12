@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const socket = io();
 
+  // Formulario para agregar productos
   document.getElementById('addProductForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const title = document.getElementById('productName').value;
@@ -14,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('addProductForm').reset();
   });
 
+  // Formulario para eliminar productos
   document.getElementById('deleteProductForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const productId = document.getElementById('deleteProductId').value;
@@ -21,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     socket.emit('delete product', productId);
   });
 
+  // Formulario para actualizar productos
   document.getElementById('updateProductForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const productId = document.getElementById('updateProductId').value;
@@ -41,34 +44,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Manejo de la actualización de productos en tiempo real
   socket.on('product update', (product) => {
-    const existingRow = document.querySelector(`tr[data-id='${product.id}']`);
+    const existingRow = document.querySelector(`tr[data-id='${product._id}']`);
     if (existingRow) {
       existingRow.innerHTML = `
         <td>${product.title}</td>
         <td>${product.price}</td>
-        <td>${product.id}</td>
+        <td>${product._id}</td>
         <td>${product.code}</td>
         <td>${product.category}</td>
         <td>${product.description}</td>
-        <td><button class="addToCartButton" data-product-id="${product.id}">Add to Cart</button></td>
+        <td><button class="addToCartButton" data-product-id="${product._id}">Add to Cart</button></td>
       `;
+      existingRow.querySelector('.addToCartButton').addEventListener('click', addToCart);
     } else {
       const row = document.createElement('tr');
-      row.setAttribute('data-id', product.id);
+      row.setAttribute('data-id', product._id);
       row.innerHTML = `
         <td>${product.title}</td>
         <td>${product.price}</td>
-        <td>${product.id}</td>
+        <td>${product._id}</td>
         <td>${product.code}</td>
         <td>${product.category}</td>
         <td>${product.description}</td>
-        <td><button class="addToCartButton" data-product-id="${product.id}">Add to Cart</button></td>
+        <td><button class="addToCartButton" data-product-id="${product._id}">Add to Cart</button></td>
       `;
       document.getElementById('productList').appendChild(row);
+      row.querySelector('.addToCartButton').addEventListener('click', addToCart);
     }
   });
 
+  // Manejo de la eliminación de productos en tiempo real
   socket.on('product delete', (productId) => {
     const row = document.querySelector(`tr[data-id='${productId}']`);
     if (row) {
@@ -76,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Mostrar errores
   socket.on('error', (message) => {
     alert(message);
   });
@@ -83,12 +91,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Función para crear un carrito
   document.getElementById('createCartButton')?.addEventListener('click', createCart);
 
-  // Función para agregar un producto al carrito
-  document.querySelectorAll('.addToCartButton')?.forEach(button => {
+  // Asignar eventos a los botones existentes
+  document.querySelectorAll('.addToCartButton').forEach(button => {
     button.addEventListener('click', addToCart);
   });
 });
 
+// Función para crear un carrito
 function createCart() {
   fetch('/api/carts', {
     method: 'POST'
@@ -100,6 +109,7 @@ function createCart() {
   });
 }
 
+// Función para agregar un producto al carrito
 function addToCart(event) {
   const productId = event.target.dataset.productId;
   const cartId = localStorage.getItem('cartId');
