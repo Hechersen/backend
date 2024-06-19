@@ -1,16 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Products</title>
 </head>
+
 <body>
   <h1>Welcome, {{user.email}}</h1>
   <p>Role: {{user.role}}</p>
   <ul>
     {{#each products}}
-      <li>{{this.title}} - {{this.price}}</li>
+    <li>{{this.title}} - {{this.price}}</li>
     {{/each}}
   </ul>
+  <!-- Botón para ir a la página de productos en tiempo real -->
+  <button onclick="location.href='/realtimeproducts'">Real-Time Products</button>
 </body>
+
 </html>

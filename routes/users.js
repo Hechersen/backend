@@ -3,6 +3,14 @@ const router = express.Router();
 const passport = require('passport');
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
+// para github
+router.get('/github', passport.authenticate('github'));
+
+router.get('/github/callback', 
+  passport.authenticate('github', { failureRedirect: '/users/login' }),
+  (req, res) => {
+    res.redirect('/products/view');
+  });
 
 // Ruta para la vista de login (GET)
 router.get('/login', (req, res) => {

@@ -12,6 +12,8 @@ const cartManager = new CartManager();
 const session = require('express-session');
 const passport = require('passport');
 const flash = require('connect-flash');
+// para el env
+require('dotenv').config();
 
 require('./config/passport'); 
 
