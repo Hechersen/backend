@@ -83,6 +83,15 @@ app.use('/api/carts', cartRoutes);
 app.use('/carts', ensureAuthenticated, cartRoutes);
 app.use('/users', userRoutes);
 
+// Nueva ruta para obtener la sesión actual
+app.get('/api/sessions/current', (req, res) => {
+  if (req.isAuthenticated()) {
+    res.json({ user: req.user });
+  } else {
+    res.status(401).json({ error: 'Not authenticated' });
+  }
+});
+
 app.get('/realtimeproducts', ensureAuthenticated, async (req, res) => {
   const products = await productManager.getAllProducts();
   res.render('realTimeProducts', { products });

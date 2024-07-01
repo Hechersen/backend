@@ -3,6 +3,7 @@ const router = express.Router();
 const passport = require('passport');
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
+
 // para github
 router.get('/github', passport.authenticate('github'));
 
@@ -42,7 +43,8 @@ router.get('/register', (req, res) => {
 
 // Ruta para procesar el registro (POST)
 router.post('/register', async (req, res) => {
-  const { email, password, password2 } = req.body;
+  // Agregar los nuevos campos del modelo de usuario
+  const { first_name, last_name, email, age, password, password2 } = req.body;
   let errors = [];
 
   if (password !== password2) {
@@ -50,14 +52,15 @@ router.post('/register', async (req, res) => {
   }
 
   if (errors.length > 0) {
-    res.render('register', { errors, email, password, password2 });
+    res.render('register', { errors, first_name, last_name, email, age, password, password2 });
   } else {
     const user = await User.findOne({ email });
     if (user) {
       errors.push({ msg: 'Email is already registered' });
-      res.render('register', { errors, email, password, password2 });
+      res.render('register', { errors, first_name, last_name, email, age, password, password2 });
     } else {
-      const newUser = new User({ email, password });
+      // Agregar los nuevos campos al crear un nuevo usuario
+      const newUser = new User({ first_name, last_name, email, age, password });
       const salt = await bcrypt.genSalt(10);
       newUser.password = await bcrypt.hash(password, salt);
       await newUser.save();

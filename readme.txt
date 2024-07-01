@@ -16,6 +16,10 @@ dos elementos por pagina
 http://localhost:8080/api/products?limit=2
 El primer carrito
 http://localhost:8080/carts/666083d11f227df42acc14d0
+Rutas de sessions
+http://localhost:8080/api/sessions/current
+http://localhost:8080/users/github
+http://localhost:8080/users/github/callback
 
 Hola buenas tardes!
 

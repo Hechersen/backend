@@ -20,9 +20,14 @@ async (accessToken, refreshToken, profile, done) => {
       return done(null, user);
     } else {
       user = new User({
-        githubId: profile.id,
-        email: email,  
-        username: profile.username
+        first_name: profile.name?.givenName || 'N/A', 
+        last_name: profile.name?.familyName || 'N/A',
+        email: email,
+        age: 0,  // Placeholder, actual value should be provided by the user later
+        password: '', // Password not required for GitHub
+        cart: null, // Placeholder, actual cart reference should be created later
+        role: 'user', // Default role
+        githubId: profile.id
       });
       await user.save();
       return done(null, user);
@@ -31,7 +36,6 @@ async (accessToken, refreshToken, profile, done) => {
     return done(err);
   }
 }));
-
 
 passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
   try {
