@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
-const passport = require('passport'); // Asegúrate de importar passport aquí
+const passport = require('passport');
 
 exports.register = async (req, res) => {
   const { first_name, last_name, email, age, password, password2 } = req.body;

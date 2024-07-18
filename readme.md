@@ -20,3 +20,7 @@ name
 lastname
 age
 password
+
+ultimo usuario de prueba
+goku@kakaroto
+pass goku
