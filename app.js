@@ -10,11 +10,11 @@ const messageManager = new MessageManager();
 const CartManager = require('./dao/db/cartManager');
 const cartManager = new CartManager();
 const session = require('express-session');
-const passport = require('passport'); // Asegúrate de que esta línea esté presente
+const passport = require('passport'); 
 const flash = require('connect-flash');
 // para el env
 require('dotenv').config();
-require('./config/passport'); // Asegúrate de que esta línea esté presente
+require('./config/passport'); 
 
 const app = express();
 const server = http.createServer(app);
