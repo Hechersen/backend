@@ -20,6 +20,7 @@
         <th>Code</th>
         <th>Category</th>
         <th>Description</th>
+        <th>Stock</th>
       </tr>
     </thead>
     <tbody id="productList">
@@ -31,18 +32,21 @@
           <td>{{this.code}}</td>
           <td>{{this.category}}</td>
           <td>{{this.description}}</td>
+          <td class="product-stock">{{this.stock}}</td>
           <td><button class="addToCartButton" data-product-id="{{this._id}}">Add to Cart</button></td>
         </tr>
       {{/each}}
     </tbody>
   </table>
 
+  {{#if (eq user.role 'admin')}}
   <form id="addProductForm">
     <input type="text" id="productName" placeholder="Product Name">
     <input type="number" id="productPrice" placeholder="Product Price">
     <input type="text" id="productCode" placeholder="Product Code">
     <input type="text" id="productCategory" placeholder="Product Category">
     <input type="text" id="productDescription" placeholder="Product Description">
+    <input type="number" id="productStock" placeholder="Product Stock">
     <button type="submit">Add Product</button>
   </form>
 
@@ -55,7 +59,11 @@
     <input type="text" id="updateProductId" placeholder="Product ID">
     <input type="text" id="updateProductCategory" placeholder="New Category">
     <input type="text" id="updateProductDescription" placeholder="New Description">
+    <input type="number" id="updateProductStock" placeholder="New Stock">
     <button type="submit">Update Product</button>
   </form>
+  {{/if}}
+
+  <button onclick="finalizePurchase()">Finalize Purchase</button>
 </body>
 </html>

@@ -59,8 +59,16 @@ exports.addProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { category, description } = req.body;
-    const updatedProduct = await productManager.updateProduct(id, { category, description });
+    const existingProduct = await productManager.getProductById(id);
+    if (!existingProduct) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    const updatedData = {
+      category: req.body.category || existingProduct.category,
+      description: req.body.description || existingProduct.description,
+      stock: req.body.stock || existingProduct.stock,
+    };
+    const updatedProduct = await productManager.updateProduct(id, updatedData);
     if (updatedProduct) {
       req.app.get('io').emit('product update', updatedProduct);
       res.json(updatedProduct);

@@ -9,7 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const code = document.getElementById('productCode').value;
     const category = document.getElementById('productCategory').value;
     const description = document.getElementById('productDescription').value;
-    const product = { title, price, code, category, description };
+    const stock = document.getElementById('productStock').value; // Añadido campo de stock
+    const product = { title, price, code, category, description, stock }; // Añadido stock
     socket.emit('new product', product);
 
     document.getElementById('addProductForm').reset();
@@ -29,12 +30,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const productId = document.getElementById('updateProductId').value;
     const category = document.getElementById('updateProductCategory').value;
     const description = document.getElementById('updateProductDescription').value;
+    const stock = document.getElementById('updateProductStock').value; // Añadido campo de stock
     fetch(`/api/products/${productId}/update`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ category, description })
+      body: JSON.stringify({ category, description, stock }) // Añadido stock
     }).then(response => {
       if (response.ok) {
         alert('Product updated successfully');
@@ -42,6 +44,14 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Error updating product');
       }
     });
+  });
+
+  // Escuchar evento de actualización de stock
+  socket.on('stock update', (data) => {
+    const productRow = document.querySelector(`tr[data-id='${data.productId}']`);
+    if (productRow) {
+      productRow.querySelector('.product-stock').textContent = data.stock;
+    }
   });
 
   // Manejo de la actualización de productos en tiempo real
@@ -55,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${product.code}</td>
         <td>${product.category}</td>
         <td>${product.description}</td>
+        <td class="product-stock">${product.stock}</td>
         <td><button class="addToCartButton" data-product-id="${product._id}">Add to Cart</button></td>
       `;
       existingRow.querySelector('.addToCartButton').addEventListener('click', addToCart);
@@ -68,6 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${product.code}</td>
         <td>${product.category}</td>
         <td>${product.description}</td>
+        <td>${product.stock}</td>
         <td><button class="addToCartButton" data-product-id="${product._id}">Add to Cart</button></td>
       `;
       document.getElementById('productList').appendChild(row);
@@ -102,7 +114,7 @@ function createCart() {
   fetch('/api/carts', {
     method: 'POST'
   }).then(response => response.json()).then(data => {
-    localStorage.setItem('cartId', data._id);
+    localStorage.setItem('cartId', data.id);
     alert('Cart created');
   }).catch(error => {
     alert('Error creating cart');
@@ -131,5 +143,28 @@ function addToCart(event) {
     }
   }).catch(error => {
     alert('Error adding product to cart');
+  });
+}
+
+function finalizePurchase() {
+  const cartId = localStorage.getItem('cartId');
+  if (!cartId) {
+    alert('No cart found. Please create a cart first.');
+    return;
+  }
+
+  fetch(`/api/carts/${cartId}/checkout`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }).then(response => {
+    if (response.ok) {
+      alert('Purchase finalized successfully');
+    } else {
+      alert('Error finalizing purchase');
+    }
+  }).catch(error => {
+    alert('Error finalizing purchase');
   });
 }

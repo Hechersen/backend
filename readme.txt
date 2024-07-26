@@ -29,8 +29,8 @@ Muchas gracias por todo, saludos!
 
 Héctor Hernández.
 
+usuario admin
 adminCoder@coder.com
 adminCod3r123
-
-
-
+mail para nodemailer
+hectorginer.dev@gmail.com

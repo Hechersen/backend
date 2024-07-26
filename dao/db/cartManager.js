@@ -1,10 +1,11 @@
 const Cart = require('../../models/cart');
+const CartDTO = require('../../dto/cartDTO');
 
 class CartManager {
   async createCart() {
     const cart = new Cart({ products: [] });
     await cart.save();
-    return cart;
+    return new CartDTO(cart);
   }
 
   async addProductToCart(cartId, product, quantity) {
@@ -19,11 +20,15 @@ class CartManager {
       cart.products.push({ product: product._id, quantity });
     }
     await cart.save();
-    return cart;
+    return new CartDTO(cart);
   }
 
   async getCartById(cartId) {
-    return Cart.findById(cartId).populate('products.product');
+    const cart = await Cart.findById(cartId).populate('products.product');
+    if (!cart) {
+      throw new Error('Cart not found');
+    }
+    return new CartDTO(cart);
   }
 
   async updateCart(cartId, products) {
@@ -36,7 +41,7 @@ class CartManager {
       quantity: p.quantity
     }));
     await cart.save();
-    return cart;
+    return new CartDTO(cart);
   }
 
   async updateProductQuantity(cartId, productId, quantity) {
@@ -50,7 +55,7 @@ class CartManager {
     }
     product.quantity = quantity;
     await cart.save();
-    return cart;
+    return new CartDTO(cart);
   }
 
   async removeProductFromCart(cartId, productId) {
@@ -60,7 +65,7 @@ class CartManager {
     }
     cart.products = cart.products.filter(p => !p.product.equals(productId));
     await cart.save();
-    return cart;
+    return new CartDTO(cart);
   }
 
   async deleteCart(cartId) {

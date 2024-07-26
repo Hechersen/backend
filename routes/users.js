@@ -6,7 +6,7 @@ const userController = require('../controllers/userController');
 // para github
 router.get('/github', passport.authenticate('github'));
 
-router.get('/github/callback', 
+router.get('/github/callback',
   passport.authenticate('github', { failureRedirect: '/users/login' }),
   userController.githubCallback);
 
@@ -29,4 +29,8 @@ router.get('/register', (req, res) => {
 // Ruta para procesar el registro (POST)
 router.post('/register', userController.register);
 
+// Ruta para obtener el usuario actual
+router.get('/current', userController.getCurrentUser);
+
 module.exports = router;
+
