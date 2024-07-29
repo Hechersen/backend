@@ -9,8 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const code = document.getElementById('productCode').value;
     const category = document.getElementById('productCategory').value;
     const description = document.getElementById('productDescription').value;
-    const stock = document.getElementById('productStock').value; // Añadido campo de stock
-    const product = { title, price, code, category, description, stock }; // Añadido stock
+    const stock = document.getElementById('productStock').value;
+    const product = { title, price, code, category, description, stock };
     socket.emit('new product', product);
 
     document.getElementById('addProductForm').reset();
@@ -30,13 +30,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const productId = document.getElementById('updateProductId').value;
     const category = document.getElementById('updateProductCategory').value;
     const description = document.getElementById('updateProductDescription').value;
-    const stock = document.getElementById('updateProductStock').value; // Añadido campo de stock
+    const stock = document.getElementById('updateProductStock').value;
     fetch(`/api/products/${productId}/update`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ category, description, stock }) // Añadido stock
+      body: JSON.stringify({ category, description, stock })
     }).then(response => {
       if (response.ok) {
         alert('Product updated successfully');
