@@ -107,6 +107,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.addToCartButton').forEach(button => {
     button.addEventListener('click', addToCart);
   });
+
+  // Finalizar compra
+  document.getElementById('finalizePurchaseButton')?.addEventListener('click', finalizePurchase);
 });
 
 // Función para crear un carrito
@@ -158,11 +161,13 @@ function finalizePurchase() {
     headers: {
       'Content-Type': 'application/json'
     }
-  }).then(response => {
-    if (response.ok) {
+  }).then(response => response.json()).then(data => {
+    if (data.message) {
       alert('Purchase finalized successfully');
-    } else {
-      alert('Error finalizing purchase');
+    }
+    if (data.failedProducts && data.failedProducts.length > 0) {
+      const failedProducts = data.failedProducts.map(item => `- ${item.product.title} (x${item.quantity})`).join('\n');
+      alert(`Purchase completed with some failures:\n\nFailed Products:\n${failedProducts}`);
     }
   }).catch(error => {
     alert('Error finalizing purchase');

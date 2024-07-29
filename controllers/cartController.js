@@ -90,6 +90,7 @@ exports.checkoutCart = async (req, res) => {
 
     let totalAmount = 0;
     const productsToPurchase = [];
+    const failedProducts = [];
 
     for (const item of cart.products) {
       const product = await productManager.getProductById(item.product._id);
@@ -105,8 +106,12 @@ exports.checkoutCart = async (req, res) => {
           quantity: item.quantity
         });
       } else {
-        return res.status(400).json({ error: `Not enough stock for product ${product.title}` });
+        failedProducts.push(item);
       }
+    }
+
+    if (productsToPurchase.length === 0) {
+      return res.status(400).json({ error: 'No products available for purchase due to insufficient stock' });
     }
 
     const ticket = new Ticket({
@@ -132,8 +137,8 @@ exports.checkoutCart = async (req, res) => {
       });
     }
 
-    // Eliminar el carrito después de la compra
-    await cartRepository.deleteCart(cid);
+    // Actualizar el carrito con los productos no comprados
+    const updatedCart = await cartRepository.updateCart(cid, failedProducts);
 
     // Enviar correo electrónico con el ticket
     const mailOptions = {
@@ -151,10 +156,9 @@ exports.checkoutCart = async (req, res) => {
       }
     });
 
-    res.json({ message: 'Purchase finalized, ticket created and cart deleted', ticket });
+    res.json({ message: 'Purchase finalized, ticket created and cart updated with failed products', ticket, failedProducts });
   } catch (error) {
     console.error('Error during checkout:', error);
     res.status(500).json({ error: error.message });
   }
 };
-
