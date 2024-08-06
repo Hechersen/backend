@@ -1,5 +1,6 @@
 const ProductManager = require('../dao/db/productManager');
 const productManager = new ProductManager();
+const { generateMockProducts } = require('../utils/mocking');
 
 exports.getAllProducts = async (req, res) => {
   try {
@@ -86,5 +87,16 @@ exports.deleteProduct = async (req, res) => {
     res.json({ message: 'Product deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Error deleting the product' });
+  }
+};
+
+// Nueva función para el mocking de productos
+exports.mockProducts = async (req, res, next) => {
+  try {
+    // Generar productos simulados
+    const mockProducts = generateMockProducts(100);
+    res.json({ status: 'success', data: mockProducts });
+  } catch (error) {
+    next(error); 
   }
 };

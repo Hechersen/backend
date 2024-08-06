@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const productController = require('../controllers/productController');
-const { ensureAdmin } = require('../middleware/auth');
+const { ensureAdmin, ensureAuthenticated } = require('../middleware/auth');
+
+// Asegúrate de importar la función mockProducts
+router.get('/mockingproducts', ensureAuthenticated , productController.mockProducts);
 
 router.get('/', productController.getAllProducts);
 router.get('/view', productController.getAllProducts);
@@ -12,6 +15,3 @@ router.put('/:id/update', ensureAdmin, productController.updateProduct);
 router.delete('/:id', ensureAdmin, productController.deleteProduct);
 
 module.exports = router;
-
-
-

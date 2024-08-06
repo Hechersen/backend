@@ -12,6 +12,7 @@ const cartManager = new CartManager();
 const session = require('express-session');
 const passport = require('passport');
 const flash = require('connect-flash');
+const errorHandler = require('./middleware/errorHandler');
 require('dotenv').config();
 require('./config/passport');
 const User = require('./models/user');
@@ -87,17 +88,25 @@ app.get('/api/sessions/current', (req, res) => {
   }
 });
 
-app.get('/realtimeproducts', ensureAuthenticated, async (req, res) => {
-  const products = await productManager.getAllProducts();
-  res.render('realTimeProducts', { products });
+app.get('/realtimeproducts', ensureAuthenticated, async (req, res, next) => {
+  try {
+    const products = await productManager.getAllProducts();
+    res.render('realTimeProducts', { products });
+  } catch (error) {
+    next(error);
+  }
 });
 
-app.get('/chat', ensureAuthenticated, async (req, res) => {
-  const messages = await messageManager.getAllMessages();
-  res.render('chat', { messages });
+app.get('/chat', ensureAuthenticated, async (req, res, next) => {
+  try {
+    const messages = await messageManager.getAllMessages();
+    res.render('chat', { messages });
+  } catch (error) {
+    next(error);
+  }
 });
 
-app.get('/carts/:cid', ensureAuthenticated, async (req, res) => {
+app.get('/carts/:cid', ensureAuthenticated, async (req, res, next) => {
   try {
     const cart = await cartManager.getCartById(req.params.cid);
     if (!cart) {
@@ -105,7 +114,7 @@ app.get('/carts/:cid', ensureAuthenticated, async (req, res) => {
     }
     res.render('cart', { cart });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 });
 
@@ -113,13 +122,18 @@ io.on('connection', (socket) => {
   console.log('Usuario conectado');
 
   socket.on('new product', async (product) => {
-    const products = await productManager.getAllProducts();
-    const existingProduct = products.find(p => p.code === product.code);
-    if (existingProduct) {
-      socket.emit('error', 'Product with this code already exists');
-    } else {
-      const newProduct = await productManager.addProduct(product);
-      io.emit('product update', newProduct);
+    try {
+      const products = await productManager.getAllProducts();
+      const existingProduct = products.find(p => p.code === product.code);
+      if (existingProduct) {
+        socket.emit('error', 'Product with this code already exists');
+      } else {
+        const newProduct = await productManager.addProduct(product);
+        io.emit('product update', newProduct);
+      }
+    } catch (error) {
+      console.error('Error adding product:', error);
+      socket.emit('error', 'Error adding product.');
     }
   });
 
@@ -129,6 +143,7 @@ io.on('connection', (socket) => {
       await productManager.deleteProduct(productId);
       io.emit('product delete', productId);
     } catch (error) {
+      console.error('Error deleting product:', error);
       socket.emit('error', `Error deleting product with id ${productId}: ${error.message}`);
     }
   });
@@ -148,8 +163,8 @@ io.on('connection', (socket) => {
         socket.emit('error', 'Only users can send messages.');
       }
     } catch (error) {
+      console.error('Error processing message:', error);
       socket.emit('error', 'Error processing message.');
-      console.error('Error during chat message handling:', error);
     }
   });
 
@@ -157,6 +172,9 @@ io.on('connection', (socket) => {
     console.log('Usuario desconectado');
   });
 });
+
+// Integrar el manejador de errores al final
+app.use(errorHandler);
 
 server.listen(port, () => {
   console.log(`Server running on port ${port}`);

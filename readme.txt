@@ -34,3 +34,5 @@ adminCoder@coder.com
 adminCod3r123
 mail para nodemailer
 hectorginer.dev@gmail.com
+endpoint para mocking prods 
+http://localhost:8080/api/products/mockingproducts
