@@ -36,3 +36,6 @@ mail para nodemailer
 hectorginer.dev@gmail.com
 endpoint para mocking prods 
 http://localhost:8080/api/products/mockingproducts
+
+set NODE_ENV=production && node app.js
+

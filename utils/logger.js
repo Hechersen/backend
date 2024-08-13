@@ -52,4 +52,8 @@ const productionLogger = createLogger({
 // Exportamos el logger adecuado según el entorno
 const logger = process.env.NODE_ENV === 'production' ? productionLogger : developmentLogger;
 
+logger.error('Test log for errors.log');
+productionLogger.error('Manual test error -> errors.log');
+console.log(`Running in ${process.env.NODE_ENV} mode`);
+
 module.exports = logger;

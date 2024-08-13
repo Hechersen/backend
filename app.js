@@ -46,12 +46,12 @@ app.use(express.static('public'));
 
 app.engine('handlebars', engine({
   helpers: {
-    eq: (a, b) => a === b
+    eq: (a, b) => a === b,
   },
   runtimeOptions: {
     allowProtoPropertiesByDefault: true,
     allowProtoMethodsByDefault: true,
-  }
+  },
 }));
 app.set('view engine', 'handlebars');
 app.set('views', './views');
