@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('deleteProductForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const productId = document.getElementById('deleteProductId').value;
-    console.log(`Attempting to delete product with ID: ${productId}`);
+    logger.debug(`Attempting to delete product with ID: ${productId}`);
     socket.emit('delete product', productId);
   });
 

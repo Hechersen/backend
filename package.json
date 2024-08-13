@@ -19,7 +19,8 @@
     "passport-github": "^1.1.0",
     "passport-local": "^1.0.0",
     "socket.io": "^4.7.5",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "winston": "^3.14.1"
   },
   "scripts": {
     "start": "node app.js",

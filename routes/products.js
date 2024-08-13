@@ -3,7 +3,7 @@ const router = express.Router();
 const productController = require('../controllers/productController');
 const { ensureAdmin, ensureAuthenticated } = require('../middleware/auth');
 
-// Asegúrate de importar la función mockProducts
+// Función mockProducts
 router.get('/mockingproducts', ensureAuthenticated , productController.mockProducts);
 
 router.get('/', productController.getAllProducts);

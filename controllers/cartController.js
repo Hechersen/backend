@@ -5,12 +5,14 @@ const productManager = new ProductManager();
 const { v4: uuidv4 } = require('uuid');
 const Ticket = require('../models/ticket');
 const transporter = require('../config/nodemailer');
+const logger = require('../utils/logger'); 
 
 exports.createCart = async (req, res) => {
   try {
     const newCart = await cartRepository.createCart();
     res.status(201).json(newCart);
   } catch (error) {
+    logger.error('Error creating cart:', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -26,6 +28,7 @@ exports.addProductToCart = async (req, res) => {
     const updatedCart = await cartRepository.addProductToCart(cid, product, quantity);
     res.status(200).json(updatedCart);
   } catch (error) {
+    logger.error('Error adding product to cart:', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -39,6 +42,7 @@ exports.getCartById = async (req, res) => {
     }
     res.json(cart);
   } catch (error) {
+    logger.error('Error fetching cart by ID:', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -49,6 +53,7 @@ exports.deleteCart = async (req, res) => {
     await cartRepository.deleteCart(cid);
     res.status(204).send();
   } catch (error) {
+    logger.error('Error deleting cart:', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -58,6 +63,7 @@ exports.removeProductFromCart = async (req, res) => {
     await cartRepository.removeProductFromCart(req.params.cid, req.params.pid);
     res.json({ message: 'Product removed from cart successfully' });
   } catch (error) {
+    logger.error('Error removing product from cart:', error);
     res.status(500).json({ error: 'Error removing product from cart' });
   }
 };
@@ -67,6 +73,7 @@ exports.updateCart = async (req, res) => {
     const updatedCart = await cartRepository.updateCart(req.params.cid, req.body.products);
     res.json(updatedCart);
   } catch (error) {
+    logger.error('Error updating cart:', error);
     res.status(500).json({ error: 'Error updating cart' });
   }
 };
@@ -76,6 +83,7 @@ exports.updateProductQuantity = async (req, res) => {
     const updatedCart = await cartRepository.updateProductQuantity(req.params.cid, req.params.pid, req.body.quantity);
     res.json(updatedCart);
   } catch (error) {
+    logger.error('Error updating product quantity in cart:', error);
     res.status(500).json({ error: 'Error updating product quantity in cart' });
   }
 };
@@ -150,15 +158,15 @@ exports.checkoutCart = async (req, res) => {
 
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
-        console.log('Error sending email:', error);
+        logger.error('Error sending email:', error);
       } else {
-        console.log('Email sent:', info.response);
+        logger.info('Email sent:', info.response);
       }
     });
 
     res.json({ message: 'Purchase finalized, ticket created and cart updated with failed products', ticket, failedProducts });
   } catch (error) {
-    console.error('Error during checkout:', error);
+    logger.error('Error during checkout:', error);
     res.status(500).json({ error: error.message });
   }
 };

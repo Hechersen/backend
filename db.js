@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { mongoURL } = require('./config');
+const logger = require('./utils/logger');
 
 const connectDB = async () => {
   try {
@@ -7,12 +8,11 @@ const connectDB = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true
     });
-    console.log('MongoDB connected...');
+    logger.info('MongoDB connected...');
   } catch (err) {
-    console.error(err.message);
+    logger.error(`Error connecting to MongoDB: ${err.message}`);
     process.exit(1);
   }
 };
 
 module.exports = connectDB;
-

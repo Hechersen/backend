@@ -13,6 +13,7 @@ const session = require('express-session');
 const passport = require('passport');
 const flash = require('connect-flash');
 const errorHandler = require('./middleware/errorHandler');
+const logger = require('./utils/logger');
 require('dotenv').config();
 require('./config/passport');
 const User = require('./models/user');
@@ -106,6 +107,16 @@ app.get('/chat', ensureAuthenticated, async (req, res, next) => {
   }
 });
 
+app.get('/loggerTest', (req, res) => {
+  logger.debug('Debug log');
+  logger.http('HTTP log');
+  logger.info('Info log');
+  logger.warning('Warning log');
+  logger.error('Error log');
+  logger.fatal('Fatal log');
+  res.send('Logger test completed. Check your logs.');
+});
+
 app.get('/carts/:cid', ensureAuthenticated, async (req, res, next) => {
   try {
     const cart = await cartManager.getCartById(req.params.cid);
@@ -119,7 +130,7 @@ app.get('/carts/:cid', ensureAuthenticated, async (req, res, next) => {
 });
 
 io.on('connection', (socket) => {
-  console.log('Usuario conectado');
+  logger.info('Usuario conectado');
 
   socket.on('new product', async (product) => {
     try {
@@ -132,18 +143,18 @@ io.on('connection', (socket) => {
         io.emit('product update', newProduct);
       }
     } catch (error) {
-      console.error('Error adding product:', error);
+      logger.error('Error adding product:', error);
       socket.emit('error', 'Error adding product.');
     }
   });
 
   socket.on('delete product', async (productId) => {
-    console.log(`Server received request to delete product with ID: ${productId}`);
+    logger.info(`Server received request to delete product with ID: ${productId}`);
     try {
       await productManager.deleteProduct(productId);
       io.emit('product delete', productId);
     } catch (error) {
-      console.error('Error deleting product:', error);
+      logger.error('Error deleting product:', error);
       socket.emit('error', `Error deleting product with id ${productId}: ${error.message}`);
     }
   });
@@ -163,13 +174,13 @@ io.on('connection', (socket) => {
         socket.emit('error', 'Only users can send messages.');
       }
     } catch (error) {
-      console.error('Error processing message:', error);
+      logger.error('Error processing message:', error);
       socket.emit('error', 'Error processing message.');
     }
   });
 
   socket.on('disconnect', () => {
-    console.log('Usuario desconectado');
+    logger.info('Usuario desconectado');
   });
 });
 
@@ -177,7 +188,7 @@ io.on('connection', (socket) => {
 app.use(errorHandler);
 
 server.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  logger.info(`Server running on port ${port}`);
 });
 
 module.exports = app;
