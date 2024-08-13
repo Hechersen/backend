@@ -107,15 +107,22 @@ app.get('/chat', ensureAuthenticated, async (req, res, next) => {
   }
 });
 
-app.get('/loggerTest', (req, res) => {
-  logger.debug('Debug log');
-  logger.http('HTTP log');
-  logger.info('Info log');
-  logger.warning('Warning log');
-  logger.error('Error log');
-  logger.fatal('Fatal log');
-  res.send('Logger test completed. Check your logs.');
+app.get('/loggertest', (req, res, next) => {
+  try {
+    logger.debug('Debug log');
+    logger.http('HTTP log');
+    logger.info('Info log');
+    logger.warning('Warning log');
+    logger.error('Error log');
+    logger.fatal('Fatal log');
+    res.send('Logger test completed. Check your logs.');
+  } catch (error) {
+    logger.error('Error in /loggertest route:', error);
+    next(error);
+  }
 });
+
+
 
 app.get('/carts/:cid', ensureAuthenticated, async (req, res, next) => {
   try {

@@ -10,28 +10,20 @@ const customLevels = {
     info: 3,
     http: 4,
     debug: 5
-  },
-  colors: {
-    fatal: 'red',
-    error: 'red',
-    warning: 'yellow',
-    info: 'green',
-    http: 'magenta',
-    debug: 'blue'
   }
 };
 
 // Formato para los logs
 const logFormat = format.combine(
   format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-  format.printf(({ timestamp, level, message }) => `${timestamp} [${level}]: ${message}`)
+  format.json()
 );
 
 // Logger para el entorno de desarrollo
 const developmentLogger = createLogger({
   levels: customLevels.levels,
   format: format.combine(
-    format.colorize(),
+    format.simple(),
     logFormat
   ),
   transports: [
@@ -52,8 +44,6 @@ const productionLogger = createLogger({
 // Exportamos el logger adecuado según el entorno
 const logger = process.env.NODE_ENV === 'production' ? productionLogger : developmentLogger;
 
-logger.error('Test log for errors.log');
-productionLogger.error('Manual test error -> errors.log');
-console.log(`Running in ${process.env.NODE_ENV} mode`);
+console.log(`Logger is running in ${process.env.NODE_ENV} mode`);
 
 module.exports = logger;
