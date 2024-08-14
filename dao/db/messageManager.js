@@ -1,4 +1,5 @@
 const Message = require('../../models/message');
+const logger = require('../../utils/logger');
 
 class MessageManager {
   async addMessage(messageData) {
@@ -7,6 +8,7 @@ class MessageManager {
       await message.save();
       return message;
     } catch (error) {
+      logger.error('Error adding message:', error);
       throw new Error('Error adding message');
     }
   }
@@ -15,6 +17,7 @@ class MessageManager {
     try {
       return await Message.find();
     } catch (error) {
+      logger.error('Error retrieving messages:', error);
       throw new Error('Error retrieving messages');
     }
   }

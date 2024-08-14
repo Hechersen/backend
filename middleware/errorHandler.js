@@ -8,12 +8,12 @@ const errorDictionary = {
 };
 
 function errorHandler(err, req, res, next) {
-    const errorMessage = errorDictionary[err.message] || 'An unexpected error occurred.';
     const statusCode = err.status || 500;
-    
+    const errorMessage = errorDictionary[err.message] || err.message || 'An unexpected error occurred.';
+
     // Registrar el error en el logger
-    logger.error(`${statusCode} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
-    
+    logger.error(`${statusCode} - ${errorMessage} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
+
     res.status(statusCode).json({ error: errorMessage });
 }
 

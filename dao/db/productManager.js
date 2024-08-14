@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Product = require('../../models/product');
+const logger = require('../../utils/logger');
 
 class ProductManager {
   async addProduct(productData) {
@@ -8,6 +9,7 @@ class ProductManager {
       await product.save();
       return product;
     } catch (error) {
+      logger.error('Error adding product:', error);
       throw new Error('Error adding product');
     }
   }
@@ -16,6 +18,7 @@ class ProductManager {
     try {
       return await Product.find();
     } catch (error) {
+      logger.error('Error retrieving products:', error);
       throw new Error('Error retrieving products');
     }
   }
@@ -25,6 +28,7 @@ class ProductManager {
       const products = await Product.paginate(queryFilter, options);
       return products;
     } catch (error) {
+      logger.error('Error retrieving products with pagination:', error);
       throw new Error('Error retrieving products');
     }
   }
@@ -36,6 +40,7 @@ class ProductManager {
       }
       return await Product.findById(id);
     } catch (error) {
+      logger.error('Error retrieving product by ID:', error);
       throw new Error('Product not found');
     }
   }
@@ -48,7 +53,7 @@ class ProductManager {
       const objectId = new mongoose.Types.ObjectId(id);
       return await Product.findByIdAndUpdate(objectId, newData, { new: true });
     } catch (error) {
-      console.error('Error in updateProduct:', error); // Agrega este log detallado
+      logger.error('Error updating product:', error);
       throw new Error('Error updating product');
     }
   }
@@ -56,17 +61,16 @@ class ProductManager {
   async deleteProduct(id) {
     try {
       if (!mongoose.Types.ObjectId.isValid(id)) {
-        console.error('Invalid product ID format');
         throw new Error('Invalid product ID format');
       }
       const objectId = new mongoose.Types.ObjectId(id);
       const result = await Product.findByIdAndDelete(objectId);
       if (!result) {
-        console.error('Product not found');
         throw new Error('Product not found');
       }
       return { message: 'Product deleted successfully' };
     } catch (error) {
+      logger.error('Error deleting product:', error);
       throw new Error(`Error deleting product with id ${id}`);
     }
   }

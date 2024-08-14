@@ -1,28 +1,53 @@
 const User = require('../../models/user');
+const logger = require('../../utils/logger');
 
 class UserManager {
   async createUser(userData) {
-    const user = new User(userData);
-    await user.save();
-    return user;
+    try {
+      const user = new User(userData);
+      await user.save();
+      return user;
+    } catch (error) {
+      logger.error('Error creating user:', error);
+      throw new Error('Error creating user');
+    }
   }
 
   async findUserByEmail(email) {
-    return await User.findOne({ email });
+    try {
+      return await User.findOne({ email });
+    } catch (error) {
+      logger.error('Error finding user by email:', error);
+      throw new Error('Error finding user by email');
+    }
   }
 
   async findUserById(userId) {
-    return await User.findById(userId);
+    try {
+      return await User.findById(userId);
+    } catch (error) {
+      logger.error('Error finding user by ID:', error);
+      throw new Error('Error finding user by ID');
+    }
   }
 
   async updateUser(userId, updateData) {
-    return await User.findByIdAndUpdate(userId, updateData, { new: true });
+    try {
+      return await User.findByIdAndUpdate(userId, updateData, { new: true });
+    } catch (error) {
+      logger.error('Error updating user:', error);
+      throw new Error('Error updating user');
+    }
   }
 
   async deleteUser(userId) {
-    return await User.findByIdAndDelete(userId);
+    try {
+      return await User.findByIdAndDelete(userId);
+    } catch (error) {
+      logger.error('Error deleting user:', error);
+      throw new Error('Error deleting user');
+    }
   }
 }
 
 module.exports = UserManager;
-

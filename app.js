@@ -107,6 +107,7 @@ app.get('/chat', ensureAuthenticated, async (req, res, next) => {
   }
 });
 
+// Ruta para probar el logger
 app.get('/loggertest', (req, res, next) => {
   try {
     logger.debug('Debug log');
@@ -122,7 +123,12 @@ app.get('/loggertest', (req, res, next) => {
   }
 });
 
-
+// Nueva ruta para registrar errores del cliente
+app.post('/api/logerror', (req, res) => {
+  const { message, stack } = req.body;
+  logger.error(`Client-side error: ${message} - ${stack}`);
+  res.status(204).send();
+});
 
 app.get('/carts/:cid', ensureAuthenticated, async (req, res, next) => {
   try {
@@ -189,6 +195,13 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     logger.info('Usuario desconectado');
   });
+});
+
+// Manejador para rutas no encontradas (404)
+app.use((req, res, next) => {
+  const error = new Error('Not Found');
+  error.status = 404;
+  next(error);
 });
 
 // Integrar el manejador de errores al final

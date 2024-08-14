@@ -1,2 +1,1 @@
-2024-08-13 15:55:59 [error]: Manual test error -> errors.log
-2024-08-13 15:57:15 [error]: Manual test error -> errors.log
+{"level":"error","message":"test error","timestamp":"2024-08-14 14:01:32"}
