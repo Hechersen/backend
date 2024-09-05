@@ -8,7 +8,12 @@ const productSchema = new mongoose.Schema({
   category: String,
   description: String,
   availability: Boolean,
-  stock: Number
+  stock: Number,
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  }
 }, {
   toObject: { getters: true },
   toJSON: { getters: true }
@@ -19,4 +24,3 @@ productSchema.plugin(mongoosePaginate);
 const Product = mongoose.model('Product', productSchema);
 
 module.exports = Product;
-

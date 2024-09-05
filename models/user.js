@@ -11,9 +11,12 @@ const userSchema = new Schema({
     required: function () { return !this.githubId; }
   },
   cart: { type: Schema.Types.ObjectId, ref: 'Cart' },
-  role: { type: String, default: 'user' }, // 'user' o 'admin'
+  role: { 
+    type: String, 
+    enum: ['user', 'premium', 'admin'], 
+    default: 'user' 
+  },
   githubId: { type: String, unique: true, sparse: true }
 });
 
 module.exports = mongoose.model('User', userSchema);
-

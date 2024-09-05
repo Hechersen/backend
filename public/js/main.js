@@ -11,8 +11,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const category = document.getElementById('productCategory').value;
       const description = document.getElementById('productDescription').value;
       const stock = document.getElementById('productStock').value;
+      
+      // Asegúrate de que el producto contiene todos los campos necesarios
       const product = { title, price, code, category, description, stock };
+      
+      // Emitir el evento 'new product' al servidor
       socket.emit('new product', product);
+      
+      // Reiniciar el formulario después de agregar el producto
       document.getElementById('addProductForm').reset();
     } catch (error) {
       handleClientError(error, 'Error adding product');
@@ -209,7 +215,6 @@ function finalizePurchase() {
 // Función para manejar errores del cliente
 function handleClientError(error, context) {
   console.error(`${context}:`, error);
-  // Enviar el error al servidor para que sea registrado en los logs
   fetch('/api/logerror', {
     method: 'POST',
     headers: {

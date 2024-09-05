@@ -39,3 +39,22 @@ http://localhost:8080/api/products/mockingproducts
 
 set NODE_ENV=production && node app.js
 
+Ruta para el cambio de clave
+http://localhost:8080/password-reset/request
+
+mi usuario
+http://localhost:8080/api/sessions/current
+
+{
+  "user": {
+    "_id": "66c4c675a9554c49c2424537",
+    "first_name": "cuenta",
+    "last_name": "premium",
+    "email": "user@premium",
+    "age": 30,
+    "password": "$2a$10$EDEwZaJJY8qb0WrdgkMc1O5LEP4cWQ886Zgb/gyuPPINOIWTiRx7G",
+    "role": "user",
+    "__v": 0
+  }
+}
+

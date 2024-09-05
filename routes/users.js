@@ -32,5 +32,13 @@ router.post('/register', userController.register);
 // Ruta para obtener el usuario actual
 router.get('/current', userController.getCurrentUser);
 
-module.exports = router;
+// Nueva ruta para solicitar el restablecimiento de contraseña
+router.post('/request-password-reset', userController.requestPasswordReset);
 
+// Nueva ruta para procesar el restablecimiento de contraseña
+router.post('/reset-password', userController.resetPassword);
+
+// Ruta para cambiar el rol de un usuario (necesita autenticación y rol de administrador)
+router.post('/:uid/role', userController.changeUserRole);
+
+module.exports = router;

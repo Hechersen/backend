@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Real-Time Product List</title>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/main.js"></script>
 </head>
+
 <body>
   <h1>Real-Time Product List</h1>
 
   <button onclick="createCart()">Create Cart</button>
-  
+
   <table>
     <thead>
       <tr>
@@ -25,21 +27,21 @@
     </thead>
     <tbody id="productList">
       {{#each products}}
-        <tr data-id="{{this._id}}">
-          <td>{{this.title}}</td>
-          <td>{{this.price}}</td>
-          <td>{{this._id}}</td>
-          <td>{{this.code}}</td>
-          <td>{{this.category}}</td>
-          <td>{{this.description}}</td>
-          <td class="product-stock">{{this.stock}}</td>
-          <td><button class="addToCartButton" data-product-id="{{this._id}}">Add to Cart</button></td>
-        </tr>
+      <tr data-id="{{this._id}}">
+        <td>{{this.title}}</td>
+        <td>{{this.price}}</td>
+        <td>{{this._id}}</td>
+        <td>{{this.code}}</td>
+        <td>{{this.category}}</td>
+        <td>{{this.description}}</td>
+        <td class="product-stock">{{this.stock}}</td>
+        <td><button class="addToCartButton" data-product-id="{{this._id}}">Add to Cart</button></td>
+      </tr>
       {{/each}}
     </tbody>
   </table>
 
-  {{#if (eq user.role 'admin')}}
+  {{#if (or (eq user.role "admin") (eq user.role "premium"))}}
   <form id="addProductForm">
     <input type="text" id="productName" placeholder="Product Name">
     <input type="number" id="productPrice" placeholder="Product Price">
@@ -66,4 +68,5 @@
 
   <button onclick="finalizePurchase()">Finalize Purchase</button>
 </body>
+
 </html>

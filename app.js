@@ -4,11 +4,8 @@ const { Server } = require('socket.io');
 const { engine } = require('express-handlebars');
 const connectDB = require('./db');
 const ProductManager = require('./dao/db/productManager');
-const productManager = new ProductManager();
 const MessageManager = require('./dao/db/messageManager');
-const messageManager = new MessageManager();
 const CartManager = require('./dao/db/cartManager');
-const cartManager = new CartManager();
 const session = require('express-session');
 const passport = require('passport');
 const flash = require('connect-flash');
@@ -23,7 +20,7 @@ const { ensureAuthenticated, ensureAdmin } = require('./middleware/auth');
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-const port = 8080;
+const port = process.env.PORT || 8080;
 
 connectDB();
 
@@ -34,6 +31,10 @@ const sessionMiddleware = session({
 });
 
 app.use(sessionMiddleware);
+
+// Integración de Swagger
+const swaggerConfig = require('./config/swagger');
+swaggerConfig(app);
 
 // Configurar Socket.IO para usar el middleware de sesión
 io.use((socket, next) => {
@@ -47,6 +48,9 @@ app.use(express.static('public'));
 app.engine('handlebars', engine({
   helpers: {
     eq: (a, b) => a === b,
+    or: function () {
+      return Array.prototype.slice.call(arguments, 0, -1).some(Boolean);
+    },
   },
   runtimeOptions: {
     allowProtoPropertiesByDefault: true,
@@ -71,15 +75,41 @@ app.use((req, res, next) => {
   next();
 });
 
+// Rutas
 const productRoutes = require('./routes/products');
 const cartRoutes = require('./routes/carts');
 const userRoutes = require('./routes/users');
+const passwordResetRoutes = require('./routes/passwordReset');
 
+// Rutas para productos y carritos
 app.use('/api/products', productRoutes);
 app.use('/products', ensureAuthenticated, productRoutes);
 app.use('/api/carts', cartRoutes);
 app.use('/carts', ensureAuthenticated, cartRoutes);
+
+// Rutas para usuarios y restablecimiento de contraseñas
 app.use('/users', userRoutes);
+app.use('/password-reset', passwordResetRoutes);
+
+// Nueva ruta para cambiar el rol del usuario
+app.post('/users/:id/change-role', ensureAuthenticated, ensureAdmin, async (req, res, next) => {
+  try {
+    const userId = req.params.id;
+    const newRole = req.body.role;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    user.role = newRole;
+    await user.save();
+    res.status(200).json({ message: 'User role updated successfully', user });
+  } catch (error) {
+    logger.error('Error changing user role:', error);
+    next(error);
+  }
+});
 
 app.get('/api/sessions/current', (req, res) => {
   if (req.isAuthenticated()) {
@@ -91,7 +121,7 @@ app.get('/api/sessions/current', (req, res) => {
 
 app.get('/realtimeproducts', ensureAuthenticated, async (req, res, next) => {
   try {
-    const products = await productManager.getAllProducts();
+    const products = await new ProductManager().getAllProducts();
     res.render('realTimeProducts', { products });
   } catch (error) {
     next(error);
@@ -100,7 +130,7 @@ app.get('/realtimeproducts', ensureAuthenticated, async (req, res, next) => {
 
 app.get('/chat', ensureAuthenticated, async (req, res, next) => {
   try {
-    const messages = await messageManager.getAllMessages();
+    const messages = await new MessageManager().getAllMessages();
     res.render('chat', { messages });
   } catch (error) {
     next(error);
@@ -132,7 +162,7 @@ app.post('/api/logerror', (req, res) => {
 
 app.get('/carts/:cid', ensureAuthenticated, async (req, res, next) => {
   try {
-    const cart = await cartManager.getCartById(req.params.cid);
+    const cart = await new CartManager().getCartById(req.params.cid);
     if (!cart) {
       return res.status(404).json({ error: 'Cart not found' });
     }
@@ -142,29 +172,33 @@ app.get('/carts/:cid', ensureAuthenticated, async (req, res, next) => {
   }
 });
 
+// Socket.IO manejo de eventos
 io.on('connection', (socket) => {
   logger.info('Usuario conectado');
 
   socket.on('new product', async (product) => {
     try {
-      const products = await productManager.getAllProducts();
-      const existingProduct = products.find(p => p.code === product.code);
-      if (existingProduct) {
-        socket.emit('error', 'Product with this code already exists');
-      } else {
-        const newProduct = await productManager.addProduct(product);
-        io.emit('product update', newProduct);
+      const userId = socket.request.session?.passport?.user;
+      if (!userId) {
+        return socket.emit('error', 'User not authenticated.');
       }
+  
+      product.owner = userId;
+  
+      const newProduct = await new ProductManager().addProduct(product);
+      io.emit('product update', newProduct);
     } catch (error) {
       logger.error('Error adding product:', error);
       socket.emit('error', 'Error adding product.');
     }
   });
+  
 
+  // Eliminar producto
   socket.on('delete product', async (productId) => {
     logger.info(`Server received request to delete product with ID: ${productId}`);
     try {
-      await productManager.deleteProduct(productId);
+      await new ProductManager().deleteProduct(productId);
       io.emit('product delete', productId);
     } catch (error) {
       logger.error('Error deleting product:', error);
@@ -172,23 +206,16 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('chat message', async (msg) => {
+  // Actualizar producto
+  socket.on('update product', async (updatedProductData) => {
     try {
-      const userId = socket.request.session?.passport?.user;
-      if (!userId) {
-        return socket.emit('error', 'Authentication required to send messages.');
-      }
-
-      const user = await User.findById(userId);
-      if (user && user.role === 'user') {
-        const message = await messageManager.addMessage(msg);
-        io.emit('chat message', message);
-      } else {
-        socket.emit('error', 'Only users can send messages.');
+      const updatedProduct = await new ProductManager().updateProduct(updatedProductData._id, updatedProductData);
+      if (updatedProduct) {
+        io.emit('product update', updatedProduct);
       }
     } catch (error) {
-      logger.error('Error processing message:', error);
-      socket.emit('error', 'Error processing message.');
+      logger.error('Error updating product:', error);
+      socket.emit('error', 'Error updating product.');
     }
   });
 
@@ -211,4 +238,4 @@ server.listen(port, () => {
   logger.info(`Server running on port ${port}`);
 });
 
-module.exports = app;
+module.exports = { app, server };

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>{{title}}</title>
+  <script src="/socket.io/socket.io.js"></script>
+  {{!-- <script src="/js/main.js"></script> --}}
+</head>
+
+<body>
+  {{{body}}}
+  {{#if user}}
+  <form action="/users/logout" method="get">
+    <button type="submit">Logout</button>
+  </form>
+{{/if}}
+</body>
+
+</html>
