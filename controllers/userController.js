@@ -8,6 +8,7 @@ const PasswordResetToken = require('../models/passwordResetToken');
 const logger = require('../utils/logger');
 const userRepository = new UserRepository();
 const transporter = require('../config/nodemailer');
+const path = require('path');
 
 exports.register = async (req, res) => {
   const { first_name, last_name, email, age, password, password2 } = req.body;
@@ -41,23 +42,49 @@ exports.register = async (req, res) => {
   }
 };
 
+// exports.login = (req, res, next) => {
+//   passport.authenticate('local', {
+//     successRedirect: '/realtimeproducts',
+//     failureRedirect: '/users/login',
+//     failureFlash: true
+//   })(req, res, next);
+// };
+
+// exports.logout = (req, res) => {
+//   req.logout((err) => {
+//     if (err) {
+//       return next(err);
+//     }
+//     req.flash('success_msg', 'You are logged out');
+//     res.redirect('/users/login');
+//   });
+// };
+
 exports.login = (req, res, next) => {
   passport.authenticate('local', {
     successRedirect: '/realtimeproducts',
     failureRedirect: '/users/login',
     failureFlash: true
-  })(req, res, next);
+  })(req, res, async () => {
+    if (req.user) {
+      req.user.last_connection = new Date();
+      await req.user.save();
+    }
+  });
 };
 
 exports.logout = (req, res) => {
-  req.logout((err) => {
+  req.logout(async (err) => {
     if (err) {
       return next(err);
     }
+    req.user.last_connection = new Date();
+    await req.user.save();
     req.flash('success_msg', 'You are logged out');
     res.redirect('/users/login');
   });
 };
+
 
 exports.githubCallback = (req, res) => {
   res.redirect('/realtimeproducts');
@@ -175,6 +202,26 @@ exports.renderResetPassword = async (req, res) => {
 };
 
 // Nueva función para cambiar el rol del usuario
+// exports.changeUserRole = async (req, res) => {
+//   const { uid } = req.params;
+
+//   try {
+//     const user = await userRepository.findUserById(uid);
+//     if (!user) {
+//       return res.status(404).json({ error: 'User not found' });
+//     }
+
+//     // Cambiar el rol del usuario de "user" a "premium" o viceversa
+//     user.role = user.role === 'user' ? 'premium' : 'user';
+//     await user.save();
+
+//     res.json({ message: `User role updated to ${user.role}` });
+//   } catch (error) {
+//     logger.error('Error changing user role:', error);
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// };
+
 exports.changeUserRole = async (req, res) => {
   const { uid } = req.params;
 
@@ -184,13 +231,81 @@ exports.changeUserRole = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Cambiar el rol del usuario de "user" a "premium" o viceversa
-    user.role = user.role === 'user' ? 'premium' : 'user';
+    // Validar que los documentos requeridos estén cargados
+    const requiredDocuments = ['Identificacion', 'Comprobante de domicilio', 'Comprobante de estado de cuenta'];
+    // const uploadedDocuments = user.documents.map(doc => doc.name);
+    const uploadedDocuments = user.documents.map(doc => path.parse(doc.name).name);
+
+    const hasAllDocuments = requiredDocuments.every(doc => uploadedDocuments.includes(doc));
+
+    if (!hasAllDocuments) {
+      return res.status(400).json({ error: 'Faltan documentos para pasar a premium.' });
+    }
+
+    // Cambiar el rol del usuario de "user" a "premium"
+    user.role = 'premium';
     await user.save();
 
-    res.json({ message: `User role updated to ${user.role}` });
+    res.json({ message: `User role updated to premium` });
   } catch (error) {
     logger.error('Error changing user role:', error);
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+
+// exports.uploadDocuments = async (req, res) => {
+//   try {
+//     const { uid } = req.params;
+//     const user = await userRepository.findUserById(uid);
+
+//     if (!user) {
+//       return res.status(404).json({ error: 'User not found' });
+//     }
+
+//     if (!req.files || req.files.length === 0) {
+//       return res.status(400).json({ error: 'No files uploaded' });
+//     }
+
+//     // Guardar los documentos subidos en el usuario
+//     req.files.forEach(file => {
+//       user.documents.push({ name: file.originalname, reference: file.filename });
+//     });
+
+//     // await user.save();
+//     await user.save({ validateBeforeSave: false });
+//     res.status(200).json({ message: 'Documents uploaded successfully', user });
+//   } catch (error) {
+//     logger.error('Error uploading documents:', error);
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// };
+
+exports.uploadDocuments = async (req, res) => {
+  try {
+    const { uid } = req.params;
+    const user = await userRepository.findUserById(uid);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: 'No files uploaded' });
+    }
+
+    // Añadir los documentos sin validar otros campos
+    req.files.forEach(file => {
+      user.documents.push({ name: file.originalname, reference: file.filename });
+    });
+
+    // Guardar el usuario sin validar otros campos
+    await user.save({ validateBeforeSave: false });
+    res.status(200).json({ message: 'Documents uploaded successfully', user });
+  } catch (error) {
+    logger.error('Error uploading documents:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+

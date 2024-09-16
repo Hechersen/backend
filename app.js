@@ -90,6 +90,7 @@ app.use('/carts', ensureAuthenticated, cartRoutes);
 // Rutas para usuarios y restablecimiento de contraseñas
 app.use('/users', userRoutes);
 app.use('/password-reset', passwordResetRoutes);
+app.use('/api/users', require('./routes/api/apiUsers')); // Nueva ruta
 
 // Nueva ruta para cambiar el rol del usuario
 app.post('/users/:id/change-role', ensureAuthenticated, ensureAdmin, async (req, res, next) => {
