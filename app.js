@@ -3,19 +3,19 @@ const http = require('http');
 const { Server } = require('socket.io');
 const { engine } = require('express-handlebars');
 const connectDB = require('./db');
-const ProductManager = require('./dao/db/productManager');
-const MessageManager = require('./dao/db/messageManager');
-const CartManager = require('./dao/db/cartManager');
+const ProductManager = require('./src/dao/db/productManager');
+const MessageManager = require('./src/dao/db/messageManager');
+const CartManager = require('./src/dao/db/cartManager');
 const session = require('express-session');
 const passport = require('passport');
 const flash = require('connect-flash');
-const errorHandler = require('./middleware/errorHandler');
-const logger = require('./utils/logger');
+const errorHandler = require('./src/middleware/errorHandler');
+const logger = require('./src/utils/logger');
 require('dotenv').config();
 require('./config/passport');
-const User = require('./models/user');
+const User = require('./src/models/user');
 
-const { ensureAuthenticated, ensureAdmin } = require('./middleware/auth');
+const { ensureAuthenticated, ensureAdmin } = require('./src/middleware/auth');
 
 const app = express();
 const server = http.createServer(app);
@@ -76,10 +76,10 @@ app.use((req, res, next) => {
 });
 
 // Rutas
-const productRoutes = require('./routes/products');
-const cartRoutes = require('./routes/carts');
-const userRoutes = require('./routes/users');
-const passwordResetRoutes = require('./routes/passwordReset');
+const productRoutes = require('./src/routes/products');
+const cartRoutes = require('./src/routes/carts');
+const userRoutes = require('./src/routes/users');
+const passwordResetRoutes = require('./src/routes/passwordReset');
 
 // Rutas para productos y carritos
 app.use('/api/products', productRoutes);
@@ -90,7 +90,7 @@ app.use('/carts', ensureAuthenticated, cartRoutes);
 // Rutas para usuarios y restablecimiento de contraseñas
 app.use('/users', userRoutes);
 app.use('/password-reset', passwordResetRoutes);
-app.use('/api/users', require('./routes/api/apiUsers')); // Nueva ruta
+app.use('/api/users', require('./src/routes/api/apiUsers')); // Nueva ruta
 
 // Nueva ruta para cambiar el rol del usuario
 app.post('/users/:id/change-role', ensureAuthenticated, ensureAdmin, async (req, res, next) => {

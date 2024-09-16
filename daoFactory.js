@@ -1,6 +1,6 @@
-const CartManager = require('./dao/db/cartManager');
-const ProductManager = require('./dao/db/productManager');
-const UserManager = require('./dao/db/userManager');
+const CartManager = require('./src/dao/db/cartManager');
+const ProductManager = require('./src/dao/db/productManager');
+const UserManager = require('./src/dao/db/userManager');
 
 class DAOFactory {
     static getDAO(entity) {

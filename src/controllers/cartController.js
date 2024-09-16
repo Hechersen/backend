@@ -4,7 +4,7 @@ const ProductManager = require('../dao/db/productManager');
 const productManager = new ProductManager();
 const { v4: uuidv4 } = require('uuid');
 const Ticket = require('../models/ticket');
-const transporter = require('../config/nodemailer');
+const transporter = require('../../config/nodemailer');
 const logger = require('../utils/logger'); 
 
 // exports.createCart = async (req, res) => {

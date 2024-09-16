@@ -1,13 +1,13 @@
 const bcrypt = require('bcryptjs');
 const passport = require('passport');
-const UserDTO = require('../dto/userDTO');
-const UserRepository = require('../repositories/userRepository');
+const UserDTO = require('../../src/dto/userDTO');
+const UserRepository = require('../../src/repositories/userRepository');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const PasswordResetToken = require('../models/passwordResetToken');
-const logger = require('../utils/logger');
+const logger = require('../../src/utils/logger');
 const userRepository = new UserRepository();
-const transporter = require('../config/nodemailer');
+const transporter = require('../../config/nodemailer');
 const path = require('path');
 
 exports.register = async (req, res) => {
@@ -69,7 +69,9 @@ exports.login = (req, res, next) => {
     if (req.user) {
       req.user.last_connection = new Date();
       await req.user.save();
-    }
+  } else {
+      console.error('Usuario no autenticado');
+  }  
   });
 };
 
@@ -78,12 +80,15 @@ exports.logout = (req, res) => {
     if (err) {
       return next(err);
     }
-    req.user.last_connection = new Date();
-    await req.user.save();
+    if (req.user) {
+      req.user.last_connection = new Date();
+      await req.user.save();
+    }
     req.flash('success_msg', 'You are logged out');
     res.redirect('/users/login');
   });
 };
+
 
 
 exports.githubCallback = (req, res) => {

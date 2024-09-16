@@ -1,4 +1,4 @@
-const DAOFactory = require('../daoFactory');
+const DAOFactory = require('../../daoFactory');
 
 class CartRepository {
   constructor() {

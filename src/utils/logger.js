@@ -37,7 +37,7 @@ const productionLogger = createLogger({
   format: logFormat,
   transports: [
     new transports.Console({ level: 'info' }),
-    new transports.File({ filename: path.join(__dirname, '../logs/errors.log'), level: 'error' }),
+    new transports.File({ filename: path.join(__dirname, '../../logs/errors.log'), level: 'error' }),
   ]
 });
 
