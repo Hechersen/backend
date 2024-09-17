@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const upload = require('../../middleware/multer'); // Importamos multer correctamente desde middleware
+const upload = require('../../middleware/multer');
 const userController = require('../../controllers/userController');
 
 // Ruta para cambiar el rol de un usuario a premium

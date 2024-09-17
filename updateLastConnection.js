@@ -15,14 +15,14 @@ const connectDB = async () => {
   }
 };
 
-// Modelo de usuario (debes asegurarte de que coincida con tu esquema)
+// Modelo de usuario
 const User = require('./models/user');
 
 const updateUsers = async () => {
   try {
     await User.updateMany(
-      { last_connection: { $exists: false } }, // Filtro para usuarios sin last_connection
-      { $set: { last_connection: new Date() } } // Asignar la fecha actual
+      { last_connection: { $exists: false } },
+      { $set: { last_connection: new Date() } }
     );
     console.log('Usuarios actualizados con last_connection');
     process.exit();
@@ -32,5 +32,5 @@ const updateUsers = async () => {
   }
 };
 
-// Conectarse a la base de datos y ejecutar la actualización
+// Conectarse a la base de datos y ejecutar actualización
 connectDB().then(updateUsers);

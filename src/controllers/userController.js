@@ -42,23 +42,6 @@ exports.register = async (req, res) => {
   }
 };
 
-// exports.login = (req, res, next) => {
-//   passport.authenticate('local', {
-//     successRedirect: '/realtimeproducts',
-//     failureRedirect: '/users/login',
-//     failureFlash: true
-//   })(req, res, next);
-// };
-
-// exports.logout = (req, res) => {
-//   req.logout((err) => {
-//     if (err) {
-//       return next(err);
-//     }
-//     req.flash('success_msg', 'You are logged out');
-//     res.redirect('/users/login');
-//   });
-// };
 
 exports.login = (req, res, next) => {
   passport.authenticate('local', {
@@ -69,9 +52,9 @@ exports.login = (req, res, next) => {
     if (req.user) {
       req.user.last_connection = new Date();
       await req.user.save();
-  } else {
+    } else {
       console.error('Usuario no autenticado');
-  }  
+    }
   });
 };
 
@@ -206,26 +189,6 @@ exports.renderResetPassword = async (req, res) => {
   }
 };
 
-// Nueva función para cambiar el rol del usuario
-// exports.changeUserRole = async (req, res) => {
-//   const { uid } = req.params;
-
-//   try {
-//     const user = await userRepository.findUserById(uid);
-//     if (!user) {
-//       return res.status(404).json({ error: 'User not found' });
-//     }
-
-//     // Cambiar el rol del usuario de "user" a "premium" o viceversa
-//     user.role = user.role === 'user' ? 'premium' : 'user';
-//     await user.save();
-
-//     res.json({ message: `User role updated to ${user.role}` });
-//   } catch (error) {
-//     logger.error('Error changing user role:', error);
-//     res.status(500).json({ error: 'Server error' });
-//   }
-// };
 
 exports.changeUserRole = async (req, res) => {
   const { uid } = req.params;
@@ -258,33 +221,6 @@ exports.changeUserRole = async (req, res) => {
   }
 };
 
-
-// exports.uploadDocuments = async (req, res) => {
-//   try {
-//     const { uid } = req.params;
-//     const user = await userRepository.findUserById(uid);
-
-//     if (!user) {
-//       return res.status(404).json({ error: 'User not found' });
-//     }
-
-//     if (!req.files || req.files.length === 0) {
-//       return res.status(400).json({ error: 'No files uploaded' });
-//     }
-
-//     // Guardar los documentos subidos en el usuario
-//     req.files.forEach(file => {
-//       user.documents.push({ name: file.originalname, reference: file.filename });
-//     });
-
-//     // await user.save();
-//     await user.save({ validateBeforeSave: false });
-//     res.status(200).json({ message: 'Documents uploaded successfully', user });
-//   } catch (error) {
-//     logger.error('Error uploading documents:', error);
-//     res.status(500).json({ error: 'Server error' });
-//   }
-// };
 
 exports.uploadDocuments = async (req, res) => {
   try {

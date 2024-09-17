@@ -18,8 +18,8 @@ const userSchema = new Schema({
   cart: { type: Schema.Types.ObjectId, ref: 'Cart' },
   role: { type: String, enum: ['user', 'premium', 'admin'], default: 'user' },
   githubId: { type: String, unique: true, sparse: true },
-  documents: [documentSchema],  // Esquema de documentos
-  last_connection: { type: Date }  // Última conexión
+  documents: [documentSchema], 
+  last_connection: { type: Date }  
 });
 
 module.exports = mongoose.model('User', userSchema);
