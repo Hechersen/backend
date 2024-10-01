@@ -1,0 +1,35 @@
+     Hecho:
+
+Probamos las rutas para usuarios:
+ Obtener usuarios: Ruta /api/users para verificar si trae correctamente la lista de usuarios.
+ Modificar usuarios: Probar la ruta /users/:id/change-role para modificar el rol de un usuario.
+ Eliminar usuarios: Probar la funcionalidad de eliminar usuarios inactivos (deleteInactiveUsers) y verificar que se envíe el correo correctamente.
+ Eliminar usuarios inactivos con notificación por correo:
+ Ejecutar la función deleteInactiveUsers para comprobar que elimina los usuarios inactivos y envía los correos electrónicos de notificación.
+ Acceder a la vista administrativa /adminUsers para asegurarnos de que se puedan ver y modificar los roles de los usuarios.
+ Probar la vista administrativa:
+ Probar la eliminación de productos para usuarios premium:
+ Probar el endpoint de eliminación de productos para un usuario premium y verificar si se envía el correo de notificación al propietario.
+ Ejecutar la función finalizePurchase para comprobar que el proceso de compra se completa correctamente, actualizando el stock y generando el ticket.
+ Manejo de productos en tiempo real (Socket.IO):
+ Verificar la actualización en tiempo real de productos (agregar, eliminar, actualizar stock) en la vista correspondiente.
+ Acceder a la vista de checkout, agregar y quitar productos, y verificar que se muestren los detalles correctamente.
+ Vista y proceso de compra (checkout):
+
+     Pendiente: 
+
+
+ 
+Una vez que cada uno de estos puntos esté verificado, haremos el despliegue en Railway. ¿Listo para empezar con la primera prueba?
+
+
+nombre duplicado
+campos al registrarse ↑
+last_connection
+calcular total en vista checkout
+
+hecher.giner@gmail.com
+hecherginer
+
+adminCoder@coder.com
+adminCod3r123

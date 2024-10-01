@@ -190,36 +190,57 @@ exports.renderResetPassword = async (req, res) => {
 };
 
 
+// exports.changeUserRole = async (req, res) => {
+//   const { uid } = req.params;
+
+//   try {
+//     const user = await userRepository.findUserById(uid);
+//     if (!user) {
+//       return res.status(404).json({ error: 'User not found' });
+//     }
+
+//     // Validar que los documentos requeridos estén cargados
+//     const requiredDocuments = ['Identificacion', 'Comprobante de domicilio', 'Comprobante de estado de cuenta'];
+//     // const uploadedDocuments = user.documents.map(doc => doc.name);
+//     const uploadedDocuments = user.documents.map(doc => path.parse(doc.name).name);
+
+//     const hasAllDocuments = requiredDocuments.every(doc => uploadedDocuments.includes(doc));
+
+//     if (!hasAllDocuments) {
+//       return res.status(400).json({ error: 'Faltan documentos para pasar a premium.' });
+//     }
+
+//     // Cambiar el rol del usuario de "user" a "premium"
+//     user.role = 'premium';
+//     await user.save();
+
+//     res.json({ message: `User role updated to premium` });
+//   } catch (error) {
+//     logger.error('Error changing user role:', error);
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// };
+
+// Cambiar el rol del usuario
 exports.changeUserRole = async (req, res) => {
   const { uid } = req.params;
+  const { role } = req.body;
 
   try {
-    const user = await userRepository.findUserById(uid);
+    // Actualizar solo el campo "role" sin validar el resto del documento
+    const user = await userRepository.updateUser(uid, { role });
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Validar que los documentos requeridos estén cargados
-    const requiredDocuments = ['Identificacion', 'Comprobante de domicilio', 'Comprobante de estado de cuenta'];
-    // const uploadedDocuments = user.documents.map(doc => doc.name);
-    const uploadedDocuments = user.documents.map(doc => path.parse(doc.name).name);
-
-    const hasAllDocuments = requiredDocuments.every(doc => uploadedDocuments.includes(doc));
-
-    if (!hasAllDocuments) {
-      return res.status(400).json({ error: 'Faltan documentos para pasar a premium.' });
-    }
-
-    // Cambiar el rol del usuario de "user" a "premium"
-    user.role = 'premium';
-    await user.save();
-
-    res.json({ message: `User role updated to premium` });
+    res.redirect('/users/admin'); // Redirigir a la vista de administración
   } catch (error) {
     logger.error('Error changing user role:', error);
     res.status(500).json({ error: 'Server error' });
   }
 };
+
 
 
 exports.uploadDocuments = async (req, res) => {
@@ -249,4 +270,133 @@ exports.uploadDocuments = async (req, res) => {
   }
 };
 
+// Método para obtener todos los usuarios
+// exports.getAllUsers = async (req, res) => {
+//   try {
+//     const users = await userRepository.findAllUsers();
+//     const usersData = users.map(user => ({
+//       name: user.first_name + ' ' + user.last_name,
+//       email: user.email,
+//       role: user.role,
+//     }));
+//     res.json(usersData);
+//   } catch (error) {
+//     logger.error('Error getting users:', error);
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// };
 
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await userRepository.findAllUsers();
+    const usersData = users.map(user => ({
+      id: user._id,
+      name: `${user.first_name} ${user.last_name}`.trim(),
+      email: user.email,
+      role: user.role,
+    }));
+    res.json(usersData);
+  } catch (error) {
+    logger.error('Error getting users:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+
+exports.deleteInactiveUsers = async (req, res) => {
+  try {
+    // Obtener la fecha actual menos 2 días
+    const cutoffDate = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+    
+    // Buscar usuarios inactivos
+    const inactiveUsers = await userRepository.findUsersByLastConnectionBefore(cutoffDate);
+
+    if (inactiveUsers.length === 0) {
+      return res.status(200).json({ message: 'No inactive users found for deletion.' });
+    }
+
+    // Enviar correos y eliminar los usuarios
+    for (const user of inactiveUsers) {
+      // Enviar correo al usuario
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: user.email,
+        subject: 'Cuenta eliminada por inactividad',
+        text: `Hola ${user.first_name}, tu cuenta ha sido eliminada debido a la inactividad de los últimos 2 días.`
+      };
+
+      try {
+        await transporter.sendMail(mailOptions);
+      } catch (emailError) {
+        logger.error(`Error sending email to ${user.email}:`, emailError);
+        continue; // Continuar con la eliminación incluso si hay error al enviar el correo
+      }
+
+      // Eliminar el usuario
+      await userRepository.deleteUserById(user._id);
+      logger.info(`User ${user.email} has been deleted due to inactivity.`);
+    }
+
+    res.status(200).json({ message: `${inactiveUsers.length} inactive users deleted and notified.` });
+  } catch (error) {
+    logger.error('Error deleting inactive users:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+// Función para renderizar la vista de administración
+exports.renderAdminUsers = async (req, res) => {
+  try {
+    const users = await userRepository.findAllUsers();
+    res.render('adminUsers', { users });
+  } catch (error) {
+    logger.error('Error loading admin page:', error);
+    res.status(500).json({ error: 'Error loading admin page' });
+  }
+};
+
+// Eliminar usuario
+// exports.deleteUser = async (req, res) => {
+//   const { uid } = req.params;
+
+//   try {
+//     // Intentamos eliminar el usuario usando el manager
+//     const user = await userRepository.findUserById(uid);
+    
+//     if (!user) {
+//       // Si el usuario no se encuentra, retornamos un error 404
+//       return res.status(404).json({ error: 'User not found' });
+//     }
+
+//     // Eliminamos el usuario
+//     await userRepository.deleteUser(uid);
+
+//     // Si se elimina correctamente, mostramos un mensaje de éxito
+//     req.flash('success_msg', 'User deleted successfully');
+//     res.redirect('/users/admin'); // Redirigir a la vista de administración
+//   } catch (error) {
+//     logger.error('Error deleting user:', error);
+//     req.flash('error_msg', 'Error deleting user');
+//     res.redirect('/users/admin'); // Redirigir a la vista de administración con el mensaje de error
+//   }
+// };
+
+// Eliminar usuario
+exports.deleteUser = async (req, res) => {
+  const { uid } = req.params;
+
+  try {
+    const user = await userRepository.findUserById(uid);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    await userRepository.deleteUser(uid);
+
+    // Responder con un código de estado 200 y un mensaje de éxito
+    return res.status(200).json({ message: 'Usuario eliminado correctamente' });
+  } catch (error) {
+    logger.error('Error deleting user:', error);
+    return res.status(500).json({ error: 'Server error' });
+  }
+};

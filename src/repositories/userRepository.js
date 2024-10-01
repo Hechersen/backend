@@ -24,6 +24,19 @@ class UserRepository {
   async deleteUser(userId) {
     return await this.dao.deleteUser(userId);
   }
+
+  async findUsersByLastConnectionBefore(date) {
+    return await this.dao.findUsersByLastConnectionBefore(date);
+  }
+
+  async deleteUserById(userId) {
+    return await this.dao.deleteUserById(userId);
+  }
+
+  async findAllUsers() {
+    return await this.dao.findAllUsers();
+  }
+  
 }
 
 module.exports = UserRepository;

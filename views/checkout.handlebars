@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Checkout</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/main.js"></script>
+</head>
+
+<body>
+  <h1>Checkout</h1>
+  <!-- Botón para volver a realtimeproducts -->
+  <button onclick="window.location.href='/realtimeproducts'">Volver a Lista de Productos</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Product Name</th>
+        <th>Price</th>
+        <th>Quantity</th>
+        <th>Total</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="cartItems">
+      {{#each cart.products}}
+      <tr data-id="{{this.product._id}}">
+        <td>{{this.product.title}}</td>
+        <td>{{this.product.price}}</td>
+        <td>
+          <input type="number" class="quantity-input" value="{{this.quantity}}" min="1" />
+        </td>
+        <td class="product-total">{{multiply this.product.price this.quantity}}</td>
+        <td>
+          <button class="removeProductButton" data-product-id="{{this.product._id}}">Remove</button>
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  <h3>Total: <span id="totalAmount">{{calculateTotal cart.products}}</span></h3>
+  <button onclick="finalizePurchase()">Finalize Purchase</button>
+</body>
+
+</html>

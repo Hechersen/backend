@@ -6,7 +6,12 @@ const connectDB = require('./db');
 const ProductManager = require('./src/dao/db/productManager');
 const MessageManager = require('./src/dao/db/messageManager');
 const CartManager = require('./src/dao/db/cartManager');
+
+const transporter = require('./config/nodemailer');
 const session = require('express-session');
+const UserManager = require('./src/dao/db/userManager'); 
+const userManager = new UserManager(); 
+
 const passport = require('passport');
 const flash = require('connect-flash');
 const errorHandler = require('./src/middleware/errorHandler');
@@ -45,12 +50,33 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
+// app.engine('handlebars', engine({
+//   helpers: {
+//     eq: (a, b) => a === b,
+//     or: function () {
+//       return Array.prototype.slice.call(arguments, 0, -1).some(Boolean);
+//     },
+//   },
+//   runtimeOptions: {
+//     allowProtoPropertiesByDefault: true,
+//     allowProtoMethodsByDefault: true,
+//   },
+// }));
+// app.set('view engine', 'handlebars');
+// app.set('views', './views');
+
 app.engine('handlebars', engine({
   helpers: {
     eq: (a, b) => a === b,
     or: function () {
       return Array.prototype.slice.call(arguments, 0, -1).some(Boolean);
     },
+    multiply: (a, b) => a * b,
+    calculateTotal: (products) => {
+      return products.reduce((total, item) => {
+        return total + item.product.price * item.quantity;
+      }, 0).toFixed(2);
+    }
   },
   runtimeOptions: {
     allowProtoPropertiesByDefault: true,
@@ -86,6 +112,7 @@ app.use('/api/products', productRoutes);
 app.use('/products', ensureAuthenticated, productRoutes);
 app.use('/api/carts', cartRoutes);
 app.use('/carts', ensureAuthenticated, cartRoutes);
+app.use('/api/users', userRoutes);
 
 // Rutas para usuarios y restablecimiento de contraseñas
 app.use('/users', userRoutes);
@@ -173,7 +200,80 @@ app.get('/carts/:cid', ensureAuthenticated, async (req, res, next) => {
   }
 });
 
+// Nueva ruta para el checkout
+app.get('/checkout', ensureAuthenticated, async (req, res, next) => {
+  try {
+    // Obtener el cartId desde los parámetros de la consulta
+    const cartId = req.query.cartId;
+    if (!cartId) {
+      return res.status(400).json({ error: 'No cart ID found in query parameters' });
+    }
+
+    const cart = await new CartManager().getCartById(cartId);
+    if (!cart) {
+      return res.status(404).json({ error: 'Cart not found' });
+    }
+
+    res.render('checkout', { cart });
+  } catch (error) {
+    logger.error('Error retrieving cart by ID:', error);
+    next(error);
+  }
+});
+
+
 // Socket.IO manejo de eventos
+// io.on('connection', (socket) => {
+//   logger.info('Usuario conectado');
+
+//   socket.on('new product', async (product) => {
+//     try {
+//       const userId = socket.request.session?.passport?.user;
+//       if (!userId) {
+//         return socket.emit('error', 'User not authenticated.');
+//       }
+  
+//       product.owner = userId;
+  
+//       const newProduct = await new ProductManager().addProduct(product);
+//       io.emit('product update', newProduct);
+//     } catch (error) {
+//       logger.error('Error adding product:', error);
+//       socket.emit('error', 'Error adding product.');
+//     }
+//   });
+  
+
+//   // Eliminar producto
+//   socket.on('delete product', async (productId) => {
+//     logger.info(`Server received request to delete product with ID: ${productId}`);
+//     try {
+//       await new ProductManager().deleteProduct(productId);
+//       io.emit('product delete', productId);
+//     } catch (error) {
+//       logger.error('Error deleting product:', error);
+//       socket.emit('error', `Error deleting product with id ${productId}: ${error.message}`);
+//     }
+//   });
+
+//   // Actualizar producto
+//   socket.on('update product', async (updatedProductData) => {
+//     try {
+//       const updatedProduct = await new ProductManager().updateProduct(updatedProductData._id, updatedProductData);
+//       if (updatedProduct) {
+//         io.emit('product update', updatedProduct);
+//       }
+//     } catch (error) {
+//       logger.error('Error updating product:', error);
+//       socket.emit('error', 'Error updating product.');
+//     }
+//   });
+
+//   socket.on('disconnect', () => {
+//     logger.info('Usuario desconectado');
+//   });
+// });
+
 io.on('connection', (socket) => {
   logger.info('Usuario conectado');
 
@@ -193,13 +293,42 @@ io.on('connection', (socket) => {
       socket.emit('error', 'Error adding product.');
     }
   });
-  
 
-  // Eliminar producto
+  // Actualizar la lógica para eliminar producto
   socket.on('delete product', async (productId) => {
     logger.info(`Server received request to delete product with ID: ${productId}`);
     try {
-      await new ProductManager().deleteProduct(productId);
+      const productManager = new ProductManager();
+      const existingProduct = await productManager.getProductById(productId);
+      
+      if (!existingProduct) {
+        return socket.emit('error', 'Product not found.');
+      }
+
+      // Obtener al propietario del producto
+      const owner = await userManager.findUserById(existingProduct.owner);
+
+      // Verificar si el propietario es un usuario premium
+      if (owner && owner.role === 'premium') {
+        logger.info(`Sending email to premium user: ${owner.email}`);
+        
+        const mailOptions = {
+          from: process.env.EMAIL_USER,
+          to: owner.email,
+          subject: 'Producto eliminado',
+          text: `Hola ${owner.first_name}, tu producto "${existingProduct.title}" ha sido eliminado.`,
+        };
+
+        try {
+          await transporter.sendMail(mailOptions);
+          logger.info('Email sent successfully');
+        } catch (emailError) {
+          logger.error(`Error sending email to ${owner.email}:`, emailError);
+        }
+      }
+
+      // Eliminar el producto
+      await productManager.deleteProduct(productId);
       io.emit('product delete', productId);
     } catch (error) {
       logger.error('Error deleting product:', error);
@@ -207,23 +336,13 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Actualizar producto
-  socket.on('update product', async (updatedProductData) => {
-    try {
-      const updatedProduct = await new ProductManager().updateProduct(updatedProductData._id, updatedProductData);
-      if (updatedProduct) {
-        io.emit('product update', updatedProduct);
-      }
-    } catch (error) {
-      logger.error('Error updating product:', error);
-      socket.emit('error', 'Error updating product.');
-    }
-  });
+  // Otros eventos...
 
   socket.on('disconnect', () => {
     logger.info('Usuario desconectado');
   });
 });
+
 
 // Manejador para rutas no encontradas (404)
 app.use((req, res, next) => {

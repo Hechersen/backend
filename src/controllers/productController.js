@@ -2,6 +2,10 @@ const ProductManager = require('../dao/db/productManager');
 const productManager = new ProductManager();
 const { generateMockProducts } = require('../utils/mocking');
 const logger = require('../utils/logger');
+const nodemailer = require('nodemailer');
+const UserRepository = require('../repositories/userRepository');
+const userRepository = new UserRepository();
+const transporter = require('../../config/nodemailer');
 
 exports.getAllProducts = async (req, res) => {
   try {
@@ -36,18 +40,6 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
-// exports.getProductById = async (req, res) => {
-//   try {
-//     const { pid } = req.params;
-//     const product = await productManager.getProductById(pid);
-//     if (!product) {
-//       return res.status(404).json({ error: 'Product not found' });
-//     }
-//     res.render('productDetails', { product });
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
 
 exports.getProductById = async (req, res) => {
   try {
@@ -89,29 +81,6 @@ exports.addProduct = async (req, res) => {
 };
 
 
-
-
-// exports.addProduct = async (req, res) => {
-//   console.log('addProduct function called');
-//   try {
-//     console.log('Authenticated User:', req.user); 
-
-//     if (!req.user || !req.user._id) {
-//       return res.status(400).json({ error: 'User not authenticated or missing ID' });
-//     }
-
-//     const newProductData = {
-//       ...req.body,
-//       owner: req.user._id
-//     };
-//     const newProduct = await productManager.addProduct(newProductData);
-//     res.status(201).json(newProduct);
-//   } catch (error) {
-//     console.error('Error adding product:', error); 
-//     res.status(500).json({ error: 'Error adding new product' });
-//   }
-// };
-
 exports.updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -143,6 +112,27 @@ exports.updateProduct = async (req, res) => {
   }
 };
 
+// exports.deleteProduct = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const existingProduct = await productManager.getProductById(id);
+//     if (!existingProduct) {
+//       return res.status(404).json({ error: 'Product not found' });
+//     }
+
+//     // Verificar si el usuario es el propietario o un administrador
+//     if (req.user.role === 'premium' && existingProduct.owner.toString() !== req.user._id.toString()) {
+//       return res.status(403).json({ error: 'Premium users can only delete their own products.' });
+//     }
+
+//     await productManager.deleteProduct(id);
+//     res.json({ message: 'Product deleted successfully' });
+//   } catch (error) {
+//     logger.error('Error deleting product:', error);
+//     res.status(500).json({ error: 'Error deleting the product' });
+//   }
+// };
+
 exports.deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -156,6 +146,27 @@ exports.deleteProduct = async (req, res) => {
       return res.status(403).json({ error: 'Premium users can only delete their own products.' });
     }
 
+    // Obtener al propietario del producto
+    const owner = await userRepository.findUserById(existingProduct.owner);
+    
+    // Verificar si el propietario es un usuario premium
+    if (owner && owner.role === 'premium') {
+      // Enviar correo electrónico notificando la eliminación del producto
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: owner.email,
+        subject: 'Producto eliminado',
+        text: `Hola ${owner.first_name}, tu producto "${existingProduct.name}" ha sido eliminado.`,
+      };
+
+      try {
+        await transporter.sendMail(mailOptions);
+      } catch (emailError) {
+        logger.error(`Error sending email to ${owner.email}:`, emailError);
+      }
+    }
+
+    // Eliminar el producto
     await productManager.deleteProduct(id);
     res.json({ message: 'Product deleted successfully' });
   } catch (error) {

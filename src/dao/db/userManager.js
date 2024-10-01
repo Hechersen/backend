@@ -38,7 +38,7 @@ class UserManager {
       logger.error('Error updating user:', error);
       throw new Error('Error updating user');
     }
-  }
+  }  
 
   async deleteUser(userId) {
     try {
@@ -47,7 +47,38 @@ class UserManager {
       logger.error('Error deleting user:', error);
       throw new Error('Error deleting user');
     }
+  }  
+
+  // Nuevo método para encontrar usuarios por la última conexión
+  async findUsersByLastConnectionBefore(date) {
+    try {
+      return await User.find({ last_connection: { $lt: date } });
+    } catch (error) {
+      logger.error('Error finding users by last connection date:', error);
+      throw new Error('Error finding users by last connection date');
+    }
   }
+
+  // Nuevo método para eliminar un usuario por ID
+  async deleteUserById(userId) {
+    try {
+      return await User.findByIdAndDelete(userId);
+    } catch (error) {
+      logger.error('Error deleting user by ID:', error);
+      throw new Error('Error deleting user by ID');
+    }
+  }
+  
+
+  async findAllUsers() {
+    try {
+      const users = await User.find();
+      return users;
+    } catch (error) {
+      throw new Error('Error fetching users');
+    }
+  }
+
 }
 
 module.exports = UserManager;

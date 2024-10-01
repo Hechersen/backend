@@ -47,9 +47,24 @@ const logger = require('../utils/logger');
 //   }
 // };
 
+// exports.createCart = async (req, res) => {
+//   try {
+//     const newCart = await cartRepository.createCart();
+//     logger.info(`Cart created successfully for user: ${req.user._id}`);
+//     res.status(201).json(newCart);
+//   } catch (error) {
+//     logger.error('Error creating cart:', error);
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
 exports.createCart = async (req, res) => {
   try {
     const newCart = await cartRepository.createCart();
+    
+    // Guardar el cartId en la sesión del usuario
+    req.session.cartId = newCart._id;
+    
     logger.info(`Cart created successfully for user: ${req.user._id}`);
     res.status(201).json(newCart);
   } catch (error) {
@@ -57,6 +72,7 @@ exports.createCart = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // Restricción para agregar productos al carrito
 exports.addProductToCart = async (req, res) => {
@@ -137,6 +153,90 @@ exports.updateProductQuantity = async (req, res) => {
   }
 };
 
+// exports.checkoutCart = async (req, res) => {
+//   try {
+//     const { cid } = req.params;
+//     const cart = await cartRepository.getCartById(cid);
+//     if (!cart) {
+//       return res.status(404).json({ error: 'Cart not found' });
+//     }
+
+//     let totalAmount = 0;
+//     const productsToPurchase = [];
+//     const failedProducts = [];
+
+//     for (const item of cart.products) {
+//       const product = await productManager.getProductById(item.product._id);
+
+//       if (!product) {
+//         return res.status(404).json({ error: `Product with ID ${item.product._id} not found` });
+//       }
+
+//       if (product.stock >= item.quantity) {
+//         totalAmount += product.price * item.quantity;
+//         productsToPurchase.push({
+//           product: item.product._id,
+//           quantity: item.quantity
+//         });
+//       } else {
+//         failedProducts.push(item);
+//       }
+//     }
+
+//     if (productsToPurchase.length === 0) {
+//       return res.status(400).json({ error: 'No products available for purchase due to insufficient stock' });
+//     }
+
+//     const ticket = new Ticket({
+//       code: uuidv4(),
+//       purchaseDate: new Date(),
+//       amount: totalAmount,
+//       purchaser: req.user._id,
+//       products: productsToPurchase
+//     });
+
+//     await ticket.save();
+
+//     // Actualizar el stock de los productos una vez que se ha confirmado la compra
+//     for (const item of productsToPurchase) {
+//       const product = await productManager.getProductById(item.product);
+//       product.stock -= item.quantity;
+//       await product.save();
+
+//       // Emitir evento de WebSocket para actualizar el stock en tiempo real
+//       req.app.get('io').emit('stock update', {
+//         productId: product._id,
+//         stock: product.stock
+//       });
+//     }
+
+//     // Actualizar el carrito con los productos no comprados
+//     const updatedCart = await cartRepository.updateCart(cid, failedProducts);
+
+//     // Enviar correo electrónico con el ticket
+//     const mailOptions = {
+//       from: process.env.EMAIL_USER,
+//       to: req.user.email,
+//       subject: 'Your Purchase Ticket',
+//       text: `Thank you for your purchase! Here are the details of your ticket: \n\nTicket Code: ${ticket.code}\nAmount: $${ticket.amount}\nPurchase Date: ${ticket.purchaseDate}\n\nProducts:\n${productsToPurchase.map(item => `- ${item.product} (x${item.quantity})`).join('\n')}`
+//     };
+
+//     transporter.sendMail(mailOptions, (error, info) => {
+//       if (error) {
+//         logger.error('Error sending email:', error);
+//       } else {
+//         logger.info('Email sent:', info.response);
+//       }
+//     });
+
+//     res.json({ message: 'Purchase finalized, ticket created and cart updated with failed products', ticket, failedProducts });
+//   } catch (error) {
+//     logger.error('Error during checkout:', error);
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
+
 exports.checkoutCart = async (req, res) => {
   try {
     const { cid } = req.params;
@@ -145,21 +245,27 @@ exports.checkoutCart = async (req, res) => {
       return res.status(404).json({ error: 'Cart not found' });
     }
 
+    // Usar las cantidades actualizadas si están presentes en el cuerpo de la solicitud
+    const updatedProducts = req.body.products || cart.products.map(item => ({
+      productId: item.product._id.toString(),
+      quantity: item.quantity,
+    }));
+
     let totalAmount = 0;
     const productsToPurchase = [];
     const failedProducts = [];
 
-    for (const item of cart.products) {
-      const product = await productManager.getProductById(item.product._id);
+    for (const item of updatedProducts) {
+      const product = await productManager.getProductById(item.productId);
 
       if (!product) {
-        return res.status(404).json({ error: `Product with ID ${item.product._id} not found` });
+        return res.status(404).json({ error: `Product with ID ${item.productId} not found` });
       }
 
       if (product.stock >= item.quantity) {
         totalAmount += product.price * item.quantity;
         productsToPurchase.push({
-          product: item.product._id,
+          product: item.productId,
           quantity: item.quantity
         });
       } else {
