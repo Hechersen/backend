@@ -50,21 +50,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// app.engine('handlebars', engine({
-//   helpers: {
-//     eq: (a, b) => a === b,
-//     or: function () {
-//       return Array.prototype.slice.call(arguments, 0, -1).some(Boolean);
-//     },
-//   },
-//   runtimeOptions: {
-//     allowProtoPropertiesByDefault: true,
-//     allowProtoMethodsByDefault: true,
-//   },
-// }));
-// app.set('view engine', 'handlebars');
-// app.set('views', './views');
-
 app.engine('handlebars', engine({
   helpers: {
     eq: (a, b) => a === b,
@@ -100,6 +85,22 @@ app.use((req, res, next) => {
   res.locals.user = req.user || null;
   next();
 });
+
+
+
+// Redirigir la raíz ('/') a '/users/login'
+app.get('/', (req, res) => {
+  res.redirect('/users/login');
+});
+
+// Manejador para rutas no encontradas (404)
+app.use((req, res, next) => {
+  const error = new Error('Not Found');
+  error.status = 404;
+  next(error);
+});
+
+
 
 // Rutas
 const productRoutes = require('./src/routes/products');
