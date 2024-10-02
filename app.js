@@ -273,6 +273,10 @@ io.on('connection', (socket) => {
   });
 });
 
+// Redirigir la raíz ('/') a '/users/login'
+app.get('/', (req, res) => {
+  res.redirect('/users/login');
+});
 
 // Manejador para rutas no encontradas (404)
 app.use((req, res, next) => {
