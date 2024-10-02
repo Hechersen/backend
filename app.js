@@ -9,8 +9,8 @@ const CartManager = require('./src/dao/db/cartManager');
 
 const transporter = require('./config/nodemailer');
 const session = require('express-session');
-const UserManager = require('./src/dao/db/userManager'); 
-const userManager = new UserManager(); 
+const UserManager = require('./src/dao/db/userManager');
+const userManager = new UserManager();
 
 const passport = require('passport');
 const flash = require('connect-flash');
@@ -221,59 +221,6 @@ app.get('/checkout', ensureAuthenticated, async (req, res, next) => {
   }
 });
 
-
-// Socket.IO manejo de eventos
-// io.on('connection', (socket) => {
-//   logger.info('Usuario conectado');
-
-//   socket.on('new product', async (product) => {
-//     try {
-//       const userId = socket.request.session?.passport?.user;
-//       if (!userId) {
-//         return socket.emit('error', 'User not authenticated.');
-//       }
-  
-//       product.owner = userId;
-  
-//       const newProduct = await new ProductManager().addProduct(product);
-//       io.emit('product update', newProduct);
-//     } catch (error) {
-//       logger.error('Error adding product:', error);
-//       socket.emit('error', 'Error adding product.');
-//     }
-//   });
-  
-
-//   // Eliminar producto
-//   socket.on('delete product', async (productId) => {
-//     logger.info(`Server received request to delete product with ID: ${productId}`);
-//     try {
-//       await new ProductManager().deleteProduct(productId);
-//       io.emit('product delete', productId);
-//     } catch (error) {
-//       logger.error('Error deleting product:', error);
-//       socket.emit('error', `Error deleting product with id ${productId}: ${error.message}`);
-//     }
-//   });
-
-//   // Actualizar producto
-//   socket.on('update product', async (updatedProductData) => {
-//     try {
-//       const updatedProduct = await new ProductManager().updateProduct(updatedProductData._id, updatedProductData);
-//       if (updatedProduct) {
-//         io.emit('product update', updatedProduct);
-//       }
-//     } catch (error) {
-//       logger.error('Error updating product:', error);
-//       socket.emit('error', 'Error updating product.');
-//     }
-//   });
-
-//   socket.on('disconnect', () => {
-//     logger.info('Usuario desconectado');
-//   });
-// });
-
 io.on('connection', (socket) => {
   logger.info('Usuario conectado');
 
@@ -283,9 +230,9 @@ io.on('connection', (socket) => {
       if (!userId) {
         return socket.emit('error', 'User not authenticated.');
       }
-  
+
       product.owner = userId;
-  
+
       const newProduct = await new ProductManager().addProduct(product);
       io.emit('product update', newProduct);
     } catch (error) {
@@ -300,7 +247,7 @@ io.on('connection', (socket) => {
     try {
       const productManager = new ProductManager();
       const existingProduct = await productManager.getProductById(productId);
-      
+
       if (!existingProduct) {
         return socket.emit('error', 'Product not found.');
       }
@@ -311,7 +258,7 @@ io.on('connection', (socket) => {
       // Verificar si el propietario es un usuario premium
       if (owner && owner.role === 'premium') {
         logger.info(`Sending email to premium user: ${owner.email}`);
-        
+
         const mailOptions = {
           from: process.env.EMAIL_USER,
           to: owner.email,
@@ -335,8 +282,6 @@ io.on('connection', (socket) => {
       socket.emit('error', `Error deleting product with id ${productId}: ${error.message}`);
     }
   });
-
-  // Otros eventos...
 
   socket.on('disconnect', () => {
     logger.info('Usuario desconectado');

@@ -36,12 +36,12 @@ document.addEventListener('DOMContentLoaded', () => {
           method: 'POST'
         });
 
-        console.log(response); // <-- Agregar este log para inspeccionar la respuesta
+        console.log(response);
 
         if (response.ok) {
           const responseData = await response.json();
-          alert(responseData.message); // Mostrar el mensaje de éxito del servidor
-          location.reload(); // Recargar la página para actualizar la lista de usuarios
+          alert(responseData.message);
+          location.reload();
         } else {
           const errorData = await response.json();
           alert(`Error al eliminar el usuario: ${errorData.error || 'Error desconocido'}`);

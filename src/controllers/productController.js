@@ -112,26 +112,6 @@ exports.updateProduct = async (req, res) => {
   }
 };
 
-// exports.deleteProduct = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const existingProduct = await productManager.getProductById(id);
-//     if (!existingProduct) {
-//       return res.status(404).json({ error: 'Product not found' });
-//     }
-
-//     // Verificar si el usuario es el propietario o un administrador
-//     if (req.user.role === 'premium' && existingProduct.owner.toString() !== req.user._id.toString()) {
-//       return res.status(403).json({ error: 'Premium users can only delete their own products.' });
-//     }
-
-//     await productManager.deleteProduct(id);
-//     res.json({ message: 'Product deleted successfully' });
-//   } catch (error) {
-//     logger.error('Error deleting product:', error);
-//     res.status(500).json({ error: 'Error deleting the product' });
-//   }
-// };
 
 exports.deleteProduct = async (req, res) => {
   try {

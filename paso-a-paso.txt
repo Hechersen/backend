@@ -23,10 +23,8 @@ Probamos las rutas para usuarios:
 Una vez que cada uno de estos puntos esté verificado, haremos el despliegue en Railway. ¿Listo para empezar con la primera prueba?
 
 
-nombre duplicado
-campos al registrarse ↑
-last_connection
-calcular total en vista checkout
+
+
 
 hecher.giner@gmail.com
 hecherginer

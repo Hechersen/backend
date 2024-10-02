@@ -7,57 +7,6 @@ const Ticket = require('../models/ticket');
 const transporter = require('../../config/nodemailer');
 const logger = require('../utils/logger'); 
 
-// exports.createCart = async (req, res) => {
-//   try {
-//     // Verificar si el usuario es premium
-//     if (req.user.role === 'premium') {
-//       logger.info(`Attempt to create cart blocked for premium user: ${req.user._id}`);
-//       return res.status(403).json({ error: 'Premium users cannot create carts.' });
-//     }
-
-//     const newCart = await cartRepository.createCart();
-//     logger.info(`Cart created successfully for user: ${req.user._id}`);
-//     res.status(201).json(newCart);
-//   } catch (error) {
-//     logger.error('Error creating cart:', error);
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
-// // Restricción para agregar productos al carrito
-// exports.addProductToCart = async (req, res) => {
-//   try {
-//     const { cid } = req.params;
-//     const { productId, quantity } = req.body;
-//     const product = await productManager.getProductById(productId);
-//     if (!product) {
-//       return res.status(404).json({ error: 'Product not found' });
-//     }
-
-//     // Impedir que un usuario premium agregue su propio producto al carrito
-//     if (req.user.role === 'premium' && product.owner.toString() === req.user._id.toString()) {
-//       return res.status(403).json({ error: 'Cannot add your own product to the cart as a premium user.' });
-//     }
-
-//     const updatedCart = await cartRepository.addProductToCart(cid, product, quantity);
-//     res.status(200).json(updatedCart);
-//   } catch (error) {
-//     logger.error('Error adding product to cart:', error);
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
-// exports.createCart = async (req, res) => {
-//   try {
-//     const newCart = await cartRepository.createCart();
-//     logger.info(`Cart created successfully for user: ${req.user._id}`);
-//     res.status(201).json(newCart);
-//   } catch (error) {
-//     logger.error('Error creating cart:', error);
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
 exports.createCart = async (req, res) => {
   try {
     const newCart = await cartRepository.createCart();

@@ -16,7 +16,7 @@ const connectDB = async () => {
 };
 
 // Modelo de usuario
-const User = require('./models/user');
+const User = require('./src/models/user');
 
 const updateUsers = async () => {
   try {
