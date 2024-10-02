@@ -86,22 +86,6 @@ app.use((req, res, next) => {
   next();
 });
 
-
-
-// Redirigir la raíz ('/') a '/users/login'
-app.get('/', (req, res) => {
-  res.redirect('/users/login');
-});
-
-// Manejador para rutas no encontradas (404)
-app.use((req, res, next) => {
-  const error = new Error('Not Found');
-  error.status = 404;
-  next(error);
-});
-
-
-
 // Rutas
 const productRoutes = require('./src/routes/products');
 const cartRoutes = require('./src/routes/carts');
