@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Login</title>
 </head>
+
 <body>
   <h1>Login</h1>
 
   <!-- Mostrar mensaje de éxito si existe -->
   {{#if success_msg}}
-    <p style="color: green;">{{success_msg}}</p>
+  <p style="color: green;">{{success_msg}}</p>
   {{/if}}
 
   <!-- Mostrar mensaje de error si existe -->
   {{#if error}}
-    <p style="color: red;">{{error}}</p>
+  <p style="color: red;">{{error}}</p>
   {{/if}}
 
   <form action="/users/login" method="POST">
@@ -27,5 +29,10 @@
   <a href="/users/github">
     <button type="button">Login with GitHub</button>
   </a>
+
+  <!-- Enlace a la página de registro -->
+  <p>¿No tienes una cuenta? <a href="/users/register">Regístrate aquí</a></p>
+
 </body>
+
 </html>
